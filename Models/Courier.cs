@@ -6,7 +6,7 @@ namespace JSE.Models
 	public class Courier
 	{
 		[Key]
-		public string courier_id { get; set; }
+		public Guid courier_id { get; set; }
 
         [MaxLength(255)]
         public string courier_name { get; set; }

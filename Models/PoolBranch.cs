@@ -6,7 +6,7 @@ namespace JSE.Models
 	public class PoolBranch
 	{
         [Key]
-        public string pool_id { get; set; }
+        public Guid pool_id { get; set; }
 
         [MaxLength(255)]
         public string pool_address { get; set; }

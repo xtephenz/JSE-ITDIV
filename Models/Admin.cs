@@ -6,7 +6,7 @@ namespace JSE.Models
 	public class Admin
 	{
         [Key]
-        public string admin_id { get; set; }
+        public Guid admin_id { get; set; }
 
         [MaxLength(255)]
         public string admin_username { get; set; }

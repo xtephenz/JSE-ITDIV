@@ -6,7 +6,7 @@ namespace JSE.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions options) : base(options)
         { }
         public DbSet<Delivery> Delivery { get; set; }
         public DbSet<Courier> Courier { get; set; }

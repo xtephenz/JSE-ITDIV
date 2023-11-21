@@ -7,7 +7,7 @@ namespace JSE.Models
 	public class Delivery
 	{
         [Key]
-        public string tracking_number { get; set; }
+        public Guid tracking_number { get; set; }
 
         [MaxLength(255)]
         public string service_type { get; set; }
@@ -45,11 +45,16 @@ namespace JSE.Models
         [StringLength(13, MinimumLength = 10, ErrorMessage = "Must be between 10 and 13 characters long.")]
         public string receiver_phone { get; set; }
 
+
         [ForeignKey("PoolBranch")]
-        public string pool_id { get; set; }
+        public Guid pool_id { get; set; }
+
+        public PoolBranch PoolBranch { get; set; }
 
         [ForeignKey("Courier")]
-        public string courier_id { get; set; }
+        public Guid courier_id { get; set; }
+        public Courier Courier { get; set; }
+
 
     }
 }

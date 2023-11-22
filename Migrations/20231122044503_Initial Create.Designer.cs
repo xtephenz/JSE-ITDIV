@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JSE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231121115324_Initial Create")]
+    [Migration("20231122044503_Initial Create")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -41,7 +41,13 @@ namespace JSE.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("pool_city")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("admin_id");
+
+                    b.HasIndex("pool_city");
 
                     b.ToTable("Admin");
                 });
@@ -69,9 +75,8 @@ namespace JSE.Migrations
 
             modelBuilder.Entity("JSE.Models.Delivery", b =>
                 {
-                    b.Property<Guid>("tracking_number")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("tracking_number")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("arrival_date")
                         .HasColumnType("datetime2");
@@ -90,8 +95,9 @@ namespace JSE.Migrations
                     b.Property<int>("package_weight")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("pool_id")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("pool_city")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("receiver_address")
                         .IsRequired()
@@ -135,16 +141,15 @@ namespace JSE.Migrations
 
                     b.HasIndex("courier_id");
 
-                    b.HasIndex("pool_id");
+                    b.HasIndex("pool_city");
 
                     b.ToTable("Delivery");
                 });
 
             modelBuilder.Entity("JSE.Models.PoolBranch", b =>
                 {
-                    b.Property<Guid>("pool_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("pool_city")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("pool_address")
                         .IsRequired()
@@ -156,9 +161,20 @@ namespace JSE.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
 
-                    b.HasKey("pool_id");
+                    b.HasKey("pool_city");
 
                     b.ToTable("PoolBranch");
+                });
+
+            modelBuilder.Entity("JSE.Models.Admin", b =>
+                {
+                    b.HasOne("JSE.Models.PoolBranch", "PoolBranch")
+                        .WithMany()
+                        .HasForeignKey("pool_city")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PoolBranch");
                 });
 
             modelBuilder.Entity("JSE.Models.Delivery", b =>
@@ -171,7 +187,7 @@ namespace JSE.Migrations
 
                     b.HasOne("JSE.Models.PoolBranch", "PoolBranch")
                         .WithMany()
-                        .HasForeignKey("pool_id")
+                        .HasForeignKey("pool_city")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

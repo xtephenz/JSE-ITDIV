@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JSE.Models
 {
@@ -11,6 +12,11 @@ namespace JSE.Models
         [MaxLength(255)]
         public string admin_username { get; set; }
 
+        [Required]
+        [ForeignKey("PoolBranch")]
+        public string pool_city { get; set; }
+
+        public PoolBranch PoolBranch { get; set; }
 
         [MaxLength(255)]
         public string admin_password { get; set; }

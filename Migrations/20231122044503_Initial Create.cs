@@ -12,19 +12,6 @@ namespace JSE.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Admin",
-                columns: table => new
-                {
-                    admin_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    admin_username = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    admin_password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Admin", x => x.admin_id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Courier",
                 columns: table => new
                 {
@@ -41,20 +28,40 @@ namespace JSE.Migrations
                 name: "PoolBranch",
                 columns: table => new
                 {
-                    pool_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    pool_city = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     pool_address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     pool_phone = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PoolBranch", x => x.pool_id);
+                    table.PrimaryKey("PK_PoolBranch", x => x.pool_city);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Admin",
+                columns: table => new
+                {
+                    admin_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    admin_username = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    pool_city = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    admin_password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Admin", x => x.admin_id);
+                    table.ForeignKey(
+                        name: "FK_Admin_PoolBranch_pool_city",
+                        column: x => x.pool_city,
+                        principalTable: "PoolBranch",
+                        principalColumn: "pool_city",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Delivery",
                 columns: table => new
                 {
-                    tracking_number = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    tracking_number = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     service_type = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     sending_date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     arrival_date = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -67,7 +74,7 @@ namespace JSE.Migrations
                     receiver_name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     receiver_address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     receiver_phone = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    pool_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    pool_city = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     courier_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -80,12 +87,17 @@ namespace JSE.Migrations
                         principalColumn: "courier_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Delivery_PoolBranch_pool_id",
-                        column: x => x.pool_id,
+                        name: "FK_Delivery_PoolBranch_pool_city",
+                        column: x => x.pool_city,
                         principalTable: "PoolBranch",
-                        principalColumn: "pool_id",
+                        principalColumn: "pool_city",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Admin_pool_city",
+                table: "Admin",
+                column: "pool_city");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Delivery_courier_id",
@@ -93,9 +105,9 @@ namespace JSE.Migrations
                 column: "courier_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Delivery_pool_id",
+                name: "IX_Delivery_pool_city",
                 table: "Delivery",
-                column: "pool_id");
+                column: "pool_city");
         }
 
         /// <inheritdoc />

@@ -7,7 +7,7 @@ namespace JSE.Models
 	public class Delivery
 	{
         [Key]
-        public Guid tracking_number { get; set; }
+        public string tracking_number { get; set; }
 
         [MaxLength(255)]
         public string service_type { get; set; }
@@ -47,7 +47,7 @@ namespace JSE.Models
 
 
         [ForeignKey("PoolBranch")]
-        public Guid pool_id { get; set; }
+        public string pool_city { get; set; }
 
         public PoolBranch PoolBranch { get; set; }
 

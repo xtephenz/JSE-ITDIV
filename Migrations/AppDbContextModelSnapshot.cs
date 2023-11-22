@@ -78,7 +78,7 @@ namespace JSE.Migrations
                     b.Property<DateTime>("arrival_date")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("courier_id")
+                    b.Property<Guid?>("courier_id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("delivery_price")
@@ -92,14 +92,14 @@ namespace JSE.Migrations
                     b.Property<int>("package_weight")
                         .HasColumnType("int");
 
-                    b.Property<string>("pool_city")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("receiver_address")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("receiver_city")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("receiver_name")
                         .IsRequired()
@@ -115,6 +115,10 @@ namespace JSE.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("sender_city")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("sender_name")
                         .IsRequired()
@@ -138,7 +142,9 @@ namespace JSE.Migrations
 
                     b.HasIndex("courier_id");
 
-                    b.HasIndex("pool_city");
+                    b.HasIndex("receiver_city");
+
+                    b.HasIndex("sender_city");
 
                     b.ToTable("Delivery");
                 });
@@ -178,19 +184,32 @@ namespace JSE.Migrations
                 {
                     b.HasOne("JSE.Models.Courier", "Courier")
                         .WithMany()
-                        .HasForeignKey("courier_id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("courier_id");
+
+                    b.HasOne("JSE.Models.PoolBranch", "ReceiverPool")
+                        .WithMany("ReceivingDeliveries")
+                        .HasForeignKey("receiver_city")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("JSE.Models.PoolBranch", "PoolBranch")
-                        .WithMany()
-                        .HasForeignKey("pool_city")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("JSE.Models.PoolBranch", "SenderPool")
+                        .WithMany("SendingDeliveries")
+                        .HasForeignKey("sender_city")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Courier");
 
-                    b.Navigation("PoolBranch");
+                    b.Navigation("ReceiverPool");
+
+                    b.Navigation("SenderPool");
+                });
+
+            modelBuilder.Entity("JSE.Models.PoolBranch", b =>
+                {
+                    b.Navigation("ReceivingDeliveries");
+
+                    b.Navigation("SendingDeliveries");
                 });
 #pragma warning restore 612, 618
         }

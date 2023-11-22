@@ -46,13 +46,27 @@ namespace JSE.Models
         public string receiver_phone { get; set; }
 
 
-        [ForeignKey("PoolBranch")]
-        public string pool_city { get; set; }
 
-        public PoolBranch PoolBranch { get; set; }
+
+
+
+
+        // testing
+
+
+        [ForeignKey("SenderPool")]
+        public string sender_city { get; set; }
+
+
+        [ForeignKey("ReceiverPool")]
+        public string receiver_city { get; set; }
+        public PoolBranch SenderPool { get; set; }
+        public PoolBranch ReceiverPool { get; set; }
+
+
 
         [ForeignKey("Courier")]
-        public Guid courier_id { get; set; }
+        public Guid? courier_id { get; set; }
         public Courier Courier { get; set; }
 
 

@@ -9,8 +9,34 @@ namespace JSE.Models
         [Key]
         public string tracking_number { get; set; }
 
+        [Required]
+        public DateTime sending_date { get; set; }
+
         [MaxLength(255)]
         public string service_type { get; set; }
+
+        [Required]
+        public int package_weight { get; set; }
+
+        [Required]
+        public int delivery_price { get; set; }
+
+        [MaxLength(255)]
+        public string receiver_name { get; set; }
+
+        [MaxLength(255)]
+        public string delivery_status { get; set; }
+
+        [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$",
+         ErrorMessage = "Characters are not allowed.")]
+        public string sender_name { get; set; }
+
+        [Phone]
+        public string sender_phone { get; set; }
+
+        [MaxLength(255)]
+        public string sender_address { get; set; }
+
 
         [Required]
         public DateTime sending_date { get; set; }
@@ -21,23 +47,8 @@ namespace JSE.Models
         [Required]
         public int package_weight { get; set; }
 
-        [Required]
-        public int delivery_price { get; set; }
 
-        [MaxLength(255)]
-        public string delivery_status { get; set; }
 
-        [MaxLength(255)]
-        public string sender_name { get; set; }
-
-        [StringLength(13, MinimumLength = 10, ErrorMessage = "Must be between 10 and 13 characters long.")]
-        public string sender_phone { get; set; }
-
-        [MaxLength(255)]
-        public string sender_address { get; set; }
-
-        [MaxLength(255)]
-        public string receiver_name { get; set; }
 
         [MaxLength(255)]
         public string receiver_address { get; set; }

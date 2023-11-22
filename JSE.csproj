@@ -28,8 +28,4 @@
     <None Remove="Models\Requests\" />
     <None Remove="Models\Results\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Requests\" />
-    <Folder Include="Models\Results\" />
-  </ItemGroup>
 </Project>

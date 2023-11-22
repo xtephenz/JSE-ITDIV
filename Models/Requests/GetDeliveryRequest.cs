@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.Identity.Client;
+using System;
 namespace JSE.Models.Requests
 {
 	public class GetDeliveryRequest
 	{
-		public GetDeliveryRequest()
-		{
-		}
+			public string tracking_number;
 	}
 }
 

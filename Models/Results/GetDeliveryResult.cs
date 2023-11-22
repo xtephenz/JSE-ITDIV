@@ -3,7 +3,7 @@ namespace JSE.Models.Results
 {
     public class GetDeliveryResult
     {
-        public Guid tracking_number { get; set; }
+        public string tracking_number { get; set; }
                 
         public string service_type { get; set; }
                 

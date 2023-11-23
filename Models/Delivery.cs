@@ -21,8 +21,9 @@ namespace JSE.Models
         [Required]
         public int delivery_price { get; set; }
 
-        [MaxLength(255)]
-        public string receiver_name { get; set; }
+        [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$",
+         ErrorMessage = "Characters are not allowed.")]
+        public string intended_receiver_name { get; set; }
 
         [MaxLength(255)]
         public string delivery_status { get; set; }
@@ -37,30 +38,45 @@ namespace JSE.Models
         [MaxLength(255)]
         public string sender_address { get; set; }
 
+        [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$",
+         ErrorMessage = "Characters are not allowed.")]
+        public string actual_receiver_name { get; set; }
 
-        [Required]
-        public DateTime arrival_date { get; set; }
+        [Phone]
+        public string receiver_phone { get; set; }
 
         [MaxLength(255)]
         public string receiver_address { get; set; }
 
-        [StringLength(13, MinimumLength = 10, ErrorMessage = "Must be between 10 and 13 characters long.")]
-        public string receiver_phone { get; set; }
+        [ForeignKey("Courier")]
+        public Guid? courier_id { get; set; }
+
+        public Courier Courier { get; set; }
+
+        [ForeignKey("Admin")]
+        public Guid? admin_id { get; set; }
+
+        public Courier Admin { get; set; }
+
+        [MaxLength(255)]
+        public string fail_message { get; set; }
+
+        [Required]
+        public DateTime arrival_date { get; set; }
+
+        public byte bukti_gambar { get; set; }
+
+        public bool returned_status { get; set; }
 
         [ForeignKey("SenderPool")]
-        public string sender_city { get; set; }
+        public string pool_sender_city { get; set; }
 
         public PoolBranch SenderPool { get; set; }
 
         [ForeignKey("ReceiverPool")]
-        public string receiver_city { get; set; }
+        public string pool_receiver_city { get; set; }
 
         public PoolBranch ReceiverPool { get; set; }
-
-        [ForeignKey("Courier")]
-        public Guid? courier_id { get; set; }
-        public Courier Courier { get; set; }
-
 
     }
 }

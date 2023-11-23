@@ -26,11 +26,11 @@ namespace JSE.Controllers
             _context = context;
         }
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] AdminRegisterRequest register)
+        public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
-            if (register.admin_password != register.admin_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
+            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
                                                                                        { StatusCode = 500 };
-            var userExists = await _context.Admin.Where(c => c.admin_username == register.admin_username).ToListAsync();
+            var userExists = await _context.Courier.Where(c => c.courier_username == courier.username).ToListAsync();
             if (userExists.Count == 0)
             {
                 register.admin_password = BCrypt.Net.BCrypt.EnhancedHashPassword(register.admin_password, 13);

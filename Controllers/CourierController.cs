@@ -110,5 +110,16 @@ namespace JSE.Controllers
 
             return jwt;
         }
-    }
+
+        [HttpPost("Cancel")]
+        public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
+        {
+            var trackingExist = await _context.Delivery.Where(d => d.tracking_number == cancel.tracking_number).ToListAsync();
+            if(trackingExist.Count == 1)
+            {
+                trackingExist.return_status = true
+                await _context.SaveChangesAsync();
+            }
+
+        }
 }

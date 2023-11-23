@@ -7,7 +7,7 @@ namespace JSE.Models.Requests
 	{
 		
         [Required]
-        public string admin_username { get; set; } = string.Empty;
+        public string admin_username{ get; set; } = string.Empty;
 
         [Required]
         public string admin_password { get; set; } = string.Empty;

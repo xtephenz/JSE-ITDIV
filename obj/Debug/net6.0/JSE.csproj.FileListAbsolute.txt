@@ -178,3 +178,6 @@ C:/Users/nikif/source/repos/xtephenz/JSE-ITDIV/obj/Debug/net6.0/ref/JSE.dll
 /Users/stephenhau/Projects/JSE-ITDIV/obj/Debug/net6.0/JSE.pdb
 /Users/stephenhau/Projects/JSE-ITDIV/obj/Debug/net6.0/JSE.genruntimeconfig.cache
 /Users/stephenhau/Projects/JSE-ITDIV/obj/Debug/net6.0/ref/JSE.dll
+C:\Users\ANDREW\Source\Repos\JSE-ITDIV\obj\Debug\net6.0\JSE.dll
+C:\Users\ANDREW\Source\Repos\JSE-ITDIV\obj\Debug\net6.0\refint\JSE.dll
+C:\Users\ANDREW\Source\Repos\JSE-ITDIV\obj\Debug\net6.0\JSE.pdb

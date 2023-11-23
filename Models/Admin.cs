@@ -16,7 +16,7 @@ namespace JSE.Models
         [ForeignKey("PoolBranch")]
         public string pool_city { get; set; }
 
-        public PoolBranch PoolBranch { get; set; }
+        public Route PoolBranch { get; set; }
 
         [MaxLength(255)]
         public string admin_password { get; set; }

@@ -12,8 +12,11 @@ namespace JSE.Models
         public string courier_name { get; set; }
 
 
-        [StringLength(13, MinimumLength = 10, ErrorMessage = "Must be between 10 and 13 characters long.")]
+        [Phone]
         public string courier_phone { get; set; }
+
+        
+        public bool courier_availability { get; set; } = true;
 
     }
 }

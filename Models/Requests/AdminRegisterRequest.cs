@@ -12,9 +12,10 @@ namespace JSE.Models.Requests
         [Required]
         [ForeignKey("PoolBranch")]
         public string pool_city { get; set; } = string.Empty;
-        public string admin_password { get; set; } = string.Empty;
-        [Required]
 
+        public string admin_password { get; set; } = string.Empty;
+
+        [Required]
         public string admin_confirm_password { get; set;} = string.Empty;
 	}
 }

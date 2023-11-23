@@ -3,7 +3,7 @@ namespace JSE.Models.Results
 {
 	//public class AdminLoginResponse<T>
 	//{
- //      return;
- //   }
+	 //      return;
+	 //   }
 }
 

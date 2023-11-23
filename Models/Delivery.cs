@@ -39,16 +39,7 @@ namespace JSE.Models
 
 
         [Required]
-        public DateTime sending_date { get; set; }
-
-        [Required]
         public DateTime arrival_date { get; set; }
-
-        [Required]
-        public int package_weight { get; set; }
-
-
-
 
         [MaxLength(255)]
         public string receiver_address { get; set; }
@@ -56,25 +47,15 @@ namespace JSE.Models
         [StringLength(13, MinimumLength = 10, ErrorMessage = "Must be between 10 and 13 characters long.")]
         public string receiver_phone { get; set; }
 
-
-
-
-
-
-
-        // testing
-
-
         [ForeignKey("SenderPool")]
         public string sender_city { get; set; }
 
+        public PoolBranch SenderPool { get; set; }
 
         [ForeignKey("ReceiverPool")]
         public string receiver_city { get; set; }
-        public PoolBranch SenderPool { get; set; }
+
         public PoolBranch ReceiverPool { get; set; }
-
-
 
         [ForeignKey("Courier")]
         public Guid? courier_id { get; set; }

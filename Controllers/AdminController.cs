@@ -18,7 +18,7 @@ namespace JSE.Controllers
     public class AdminController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration; // untuk web token
 
         public AdminController(IConfiguration configuration, AppDbContext context)
 
@@ -30,9 +30,12 @@ namespace JSE.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] AdminRegisterRequest register)
         {
             var CheckPoolCity = await _context.PoolBranch.Where(c => c.pool_city == register.pool_city).ToListAsync();
-            if (register.pool_city == "" || CheckPoolCity.Count == 0) return new ObjectResult(new { message = "Invalid pool city!" });
-            if (register.admin_password != register.admin_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
-                                                                                       { StatusCode = 500 };
+            if (register.pool_city == "" || CheckPoolCity.Count == 0)
+                return new ObjectResult(new { message = "Invalid pool city!" });
+
+            if (register.admin_password != register.admin_confirm_password)
+                return new ObjectResult(new { message = "Password mismatch!" }){ StatusCode = 401 };
+
             var userExists = await _context.Admin.Where(c => c.admin_username == register.admin_username).ToListAsync();
             if (userExists.Count == 0)
             {
@@ -51,7 +54,7 @@ namespace JSE.Controllers
             {
                 return new ObjectResult(new {message = "Username already exists!"})
                 {
-                    StatusCode = 500
+                    StatusCode = 400
                 };
             }
 

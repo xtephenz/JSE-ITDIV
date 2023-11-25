@@ -24,9 +24,6 @@ namespace JSE.Models.Requests
         public Guid courier_id { get; set; }
 
         [MaxLength(255)]
-        public string courier_username { get; set; }
-
-        [MaxLength(255)]
         public string fail_message { get; set; }
 
         [Required]

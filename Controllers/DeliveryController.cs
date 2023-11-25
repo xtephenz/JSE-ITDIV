@@ -22,7 +22,24 @@ namespace JSE.Controllers
         {
             try
             {
-                var deliveries = await _context.Admin.Where(c => c.admin_id == admin_id).ToListAsync();
+                var adminObject = await _context.Admin.FindAsync(admin_id);
+                var deliveries = await _context.Delivery.Where(c => c.pool_sender_city == adminObject.pool_city && c.pool_receiver_city == adminObject.pool_city).ToListAsync();
+                return new ObjectResult(deliveries)
+                {
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpGet("")]
+        public async Task<IActionResult> GetAllDeliveries()
+        {
+            try
+            {
+                var deliveries = await _context.Delivery.ToListAsync();
                 return new ObjectResult(deliveries)
                 {
                     StatusCode = 200
@@ -34,7 +51,6 @@ namespace JSE.Controllers
             }
         }
 
-        
     }
 }
 

@@ -29,7 +29,7 @@ namespace JSE.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] AdminRegisterRequest register)
         {
-            var CheckPoolCity = await _context.PoolBranch.Where(c => c.pool_city == register.pool_city).ToListAsync();
+            var CheckPoolCity = await _context.PoolBranch.Where(c => c.pool_name == register.pool_city).ToListAsync();
             if (register.pool_city == "" || CheckPoolCity.Count == 0)
                 return new ObjectResult(new { message = "Invalid pool city!" });
 

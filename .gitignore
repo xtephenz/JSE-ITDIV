@@ -1,5 +1,5 @@
 ﻿.DS_Store
 .vs
-
-*.sln
+obj
+Migrations
 /appsettings.json

@@ -28,24 +28,24 @@ namespace JSE.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
-            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
-                                                                                       { StatusCode = 500 };
-            var userExists = await _context.Courier.Where(c => c.courier_username == courier.username).ToListAsync();
+            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
+            { StatusCode = 500 };
+            var userExists = await _context.Courier.Where(c => c.courier_username == register.courier_username).ToListAsync();
             if (userExists.Count == 0)
             {
-                register.admin_password = BCrypt.Net.BCrypt.EnhancedHashPassword(register.admin_password, 13);
-                var admin = new Admin()
+                register.courier_password = BCrypt.Net.BCrypt.EnhancedHashPassword(register.courier_password, 13);
+                var newCourrier = new Courier()
                 {
-                    admin_username = register.admin_username,
-                    admin_password = register.admin_password,
+                    courier_username = register.courier_username,
+                    courier_password = register.courier_password,
                 };
-                _context.Admin.Add(admin);
+                _context.Courier.Add(newCourrier);
                 await _context.SaveChangesAsync();
                 return Ok(register);
             }
             else
             {
-                return new ObjectResult(new {message = "Username already exists!"})
+                return new ObjectResult(new { message = "Username already exists!" })
                 {
                     StatusCode = 500
                 };
@@ -64,7 +64,8 @@ namespace JSE.Controllers
                 {
                     var token = CreateToken(login.admin_username, CheckUser[0].admin_id);
                     var responseData = new { token = token };
-                    return new ObjectResult(responseData) {
+                    return new ObjectResult(responseData)
+                    {
                         StatusCode = 200,
                     };
                 }
@@ -111,15 +112,16 @@ namespace JSE.Controllers
             return jwt;
         }
 
-        [HttpPost("Cancel")]
-        public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
-        {
-            var trackingExist = await _context.Delivery.Where(d => d.tracking_number == cancel.tracking_number).ToListAsync();
-            if(trackingExist.Count == 1)
-            {
-                trackingExist.return_status = true
-                await _context.SaveChangesAsync();
-            }
+        //[HttpPost("Cancel")]
+        //public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
+        //{
+        //    var trackingExist = await _context.Delivery.Where(d => d.tracking_number == cancel.tracking_number).ToListAsync();
+        //    if (trackingExist.Count == 1)
+        //    {
+        //        trackingExist.return_status = true;
+        //        await _context.SaveChangesAsync();
+        //    }
 
-        }
+        //}
+    }
 }

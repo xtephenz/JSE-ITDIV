@@ -19,13 +19,13 @@ namespace JSE.Data
             modelBuilder.Entity<Delivery>()
                 .HasOne(d => d.SenderPool)
                 .WithMany(p => p.SendingDeliveries)
-                .HasForeignKey(d => d.sender_city)
+                .HasForeignKey(d => d.pool_sender_city)
                 .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Delivery>()
                 .HasOne(d => d.ReceiverPool)
                 .WithMany(p => p.ReceivingDeliveries)
-                .HasForeignKey(d => d.receiver_city)
+                .HasForeignKey(d => d.pool_receiver_city)
                 .OnDelete(DeleteBehavior.Restrict); 
         }
     }

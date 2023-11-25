@@ -63,7 +63,7 @@ namespace JSE.Models
         [ForeignKey("Courier")]
         public Guid? courier_id { get; set; }
 
-        public Courier Courier { get; set; }
+        public Courier? Courier { get; set; }
 
 
         // post delivery

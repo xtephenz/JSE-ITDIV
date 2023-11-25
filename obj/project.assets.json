@@ -3439,26 +3439,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nikif\\.nuget\\packages\\": {}
+    "/Users/stephenhau/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nikif\\source\\repos\\xtephenz\\JSE-ITDIV\\JSE.csproj",
+      "projectUniqueName": "/Users/stephenhau/Projects/JSE-ITDIV/JSE.csproj",
       "projectName": "JSE",
-      "projectPath": "C:\\Users\\nikif\\source\\repos\\xtephenz\\JSE-ITDIV\\JSE.csproj",
-      "packagesPath": "C:\\Users\\nikif\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nikif\\source\\repos\\xtephenz\\JSE-ITDIV\\obj\\",
+      "projectPath": "/Users/stephenhau/Projects/JSE-ITDIV/JSE.csproj",
+      "packagesPath": "/Users/stephenhau/.nuget/packages/",
+      "outputPath": "/Users/stephenhau/Projects/JSE-ITDIV/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\nikif\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/stephenhau/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "/usr/local/share/dotnet/sdk/7.0.311/Sdks/Microsoft.NET.Sdk.Web/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -3529,7 +3528,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.311/RuntimeIdentifierGraph.json"
       }
     }
   }

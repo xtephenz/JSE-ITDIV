@@ -7,10 +7,14 @@ namespace JSE.Models.Requests
 	{
 		
         [Required]
+<<<<<<< Updated upstream
         public string admin_username{ get; set; } = string.Empty;
+=======
+        public string courier_username { get; set; } = string.Empty;
+>>>>>>> Stashed changes
 
         [Required]
-        public string admin_password { get; set; } = string.Empty;
+        public string courier_password { get; set; } = string.Empty;
         
 	}
 }

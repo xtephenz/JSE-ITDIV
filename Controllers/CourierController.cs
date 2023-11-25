@@ -28,18 +28,31 @@ namespace JSE.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
+<<<<<<< Updated upstream
             if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
             { StatusCode = 500 };
+=======
+            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
+                                                                                       { StatusCode =400 };
+>>>>>>> Stashed changes
             var userExists = await _context.Courier.Where(c => c.courier_username == register.courier_username).ToListAsync();
             if (userExists.Count == 0)
             {
                 register.courier_password = BCrypt.Net.BCrypt.EnhancedHashPassword(register.courier_password, 13);
+<<<<<<< Updated upstream
                 var newCourrier = new Courier()
+=======
+                var courier = new Courier()
+>>>>>>> Stashed changes
                 {
                     courier_username = register.courier_username,
                     courier_password = register.courier_password,
                 };
+<<<<<<< Updated upstream
                 _context.Courier.Add(newCourrier);
+=======
+                _context.Courier.Add(courier);
+>>>>>>> Stashed changes
                 await _context.SaveChangesAsync();
                 return Ok(register);
             }
@@ -47,22 +60,22 @@ namespace JSE.Controllers
             {
                 return new ObjectResult(new { message = "Username already exists!" })
                 {
-                    StatusCode = 500
+                    StatusCode = 400
                 };
             }
 
         }
         [HttpPost("login")]
-        public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
+        public async Task<IActionResult> LoginUser([FromBody] CourierLoginRequest login)
         {
-            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).ToListAsync();
+            var CheckUser = await _context.Courier.Where(c => c.courier_username == login.courier_username).ToListAsync();
             if (CheckUser.Count > 0)
             {
-                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser[0].admin_password);
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.courier_password, CheckUser[0].courier_password);
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.admin_username, CheckUser[0].admin_id);
+                    var token = CreateToken(login.courier_username, CheckUser[0].courier_id);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData)
                     {

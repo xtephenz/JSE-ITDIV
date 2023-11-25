@@ -42,7 +42,7 @@ namespace JSE.Controllers
                 var deliveries = await _context.Delivery.ToListAsync();
                 return new ObjectResult(deliveries)
                 {
-                    StatusCode = 200
+                    StatusCode = 200        
                 };
             }
             catch (Exception ex)
@@ -51,6 +51,18 @@ namespace JSE.Controllers
             }
         }
 
+<<<<<<< Updated upstream
+=======
+        [HttpPost("/daftar-pesanan"), Authorize(Roles = "Courier")]
+        public async Task<IActionResult> FailToDeliver([FromBody] Courier courier, Delivery delivery)
+        {
+            courier.Deliveries = new List<Delivery>();
+            var 
+        }
+
+
+
+>>>>>>> Stashed changes
     }
 }
 

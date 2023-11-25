@@ -13,13 +13,15 @@ namespace JSE.Models
         public string admin_username { get; set; }
 
         [Required]
+        public string admin_password { get; set; }
+
+        [Required]
         [ForeignKey("PoolBranch")]
         public string pool_city { get; set; }
 
         public PoolBranch PoolBranch { get; set; }
 
-        [MaxLength(255)]
-        public string admin_password { get; set; }
+        public List<Delivery> Deliveries { get; set; } = new List<Delivery>();
     }
 }
 

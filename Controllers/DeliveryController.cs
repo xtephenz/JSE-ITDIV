@@ -51,18 +51,6 @@ namespace JSE.Controllers
             }
         }
 
-<<<<<<< Updated upstream
-=======
-        [HttpPost("/daftar-pesanan"), Authorize(Roles = "Courier")]
-        public async Task<IActionResult> FailToDeliver([FromBody] Courier courier, Delivery delivery)
-        {
-            courier.Deliveries = new List<Delivery>();
-            var 
-        }
-
-
-
->>>>>>> Stashed changes
     }
 }
 

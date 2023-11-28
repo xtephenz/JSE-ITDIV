@@ -133,8 +133,8 @@ namespace JSE.Controllers
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
-                //if (delivery.delivery_status == "on_sender_pool")
-                //{
+                if (delivery.delivery_status == "on_sender_pool")
+                {
                     delivery.delivery_status = "dispatched";
                     var newMessage = new Message ()
                     {
@@ -147,11 +147,11 @@ namespace JSE.Controllers
                 await _context.Message.AddAsync(newMessage);
                 await _context.SaveChangesAsync();
                 return Ok(result);
-                //}
-                //else
-                //{
-                    //return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
-                //}
+                }
+                else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
             }
             catch (Exception ex)
             {

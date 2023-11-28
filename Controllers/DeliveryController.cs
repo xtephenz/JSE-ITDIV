@@ -17,7 +17,8 @@ namespace JSE.Controllers
         }
 
 
-        [HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
+        //[HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
+        [HttpGet("/daftar-pesanan")]
         public async Task<IActionResult> GetDeliveries([FromBody] Guid admin_id)
         {
             try
@@ -34,16 +35,14 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpGet("")]
+        [HttpGet("/delivery")]
         public async Task<IActionResult> GetAllDeliveries()
         {
             try
             {
                 var deliveries = await _context.Delivery.ToListAsync();
-                return new ObjectResult(deliveries)
-                {
-                    StatusCode = 200        
-                };
+                return Ok(deliveries);
+
             }
             catch (Exception ex)
             {

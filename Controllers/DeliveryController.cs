@@ -10,8 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JSE.Controllers
 {
+    [Route("delivery")]
     [ApiController]
-    [Route("[controller]")]
+
     public class DeliveryController : Controller
     {
         private readonly AppDbContext _context;
@@ -24,7 +25,7 @@ namespace JSE.Controllers
 
 
         //[HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
-        [HttpGet("/daftar-pesanan")]
+        [HttpGet("get-by-admin-id")]
         public async Task<IActionResult> GetDeliveries([FromBody] Guid admin_id)
         {
             try
@@ -66,19 +67,19 @@ namespace JSE.Controllers
             {
                 // create tracking number:
                 /*
-                Tracking Number Format: XYZ-12345-456789
+                Tracking Number Format: XYZ-DDMMYY-12345
 
                 In this modified format:
 
                 Service Type (XYZ): This part represents the type of service.
+                Shipment Date (DDMMYY): This part encodes the date of shipment or order placement, using a date format like YYMMDD or MMDDYY.
                 Package Identifier (12345): This part is a unique identifier for the package, allowing for a larger range of possibilities.
-                Shipment Date (456789): This part encodes the date of shipment or order placement, using a date format like YYMMDD or MMDDYY.
                 */
                 string packageType = delivery.service_type.ToString();
-                int packagesToDate =  _context.Delivery.Where(d => d.sending_date == delivery.sending_date).Count();
+                int packagesToDate =  _context.Delivery.Where(d => d.sending_date == delivery.sending_date).Count() + 1;
                 string packageIdentifier = packagesToDate.ToString("D5");
                 string shipmentDate = delivery.sending_date.ToString("ddMMyy");
-                string trackingNumber = $"{packageType}{packageIdentifier}{shipmentDate}";
+                string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";
 
                 delivery.tracking_number = trackingNumber;
                 delivery.delivery_status = "on_process";
@@ -94,7 +95,6 @@ namespace JSE.Controllers
                 Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(message);
                 _context.Message.Add(processedMessageObject);
                 _context.Delivery.Add(processedDeliveryObject);
-                await _context.SaveChangesAsync();
                 await _context.SaveChangesAsync();
                 return Ok(delivery);
             }

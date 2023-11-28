@@ -12,6 +12,7 @@ namespace JSE.Data
         public DbSet<Courier> Courier { get; set; }
         public DbSet<PoolBranch> PoolBranch { get; set; }
         public DbSet<Admin> Admin { get; set; }
+        public DbSet<Message> Message { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

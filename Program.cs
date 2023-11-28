@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +16,14 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.WriteIndented = true;
+                options.JsonSerializerOptions.ReferenceHandler = null;
+
             });
 
 builder.Services.AddDbContext<AppDbContext>(

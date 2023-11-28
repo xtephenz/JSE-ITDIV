@@ -93,6 +93,8 @@ namespace JSE.Controllers
                 };
             }
         }
+
+
         private string CreateToken(String Email, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {

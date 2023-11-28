@@ -104,17 +104,21 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpGet("/delivery{tracking_number}")]
+        [HttpGet("/delivery/{tracking_number}")]
         public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
         {
             try
             {
-                var deliveries = await _context.Delivery.FindAsync(tracking_number);
+                var deliveries = await _context.Delivery
+                    .Include(d => d.SenderPool)
+                    .Include(d => d.ReceiverPool)
+                    .Include(d => d.Messages)
+                    .Where(d=> d.tracking_number == tracking_number).FirstAsync();
                 GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
 
                 //var result = deliveries.ReceiverPool.pool_phone
-                return Ok(deliveries);
+                return Ok(processedDeliveryObject);
 
             }
             catch (Exception ex)

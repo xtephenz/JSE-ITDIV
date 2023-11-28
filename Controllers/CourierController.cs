@@ -30,19 +30,18 @@ namespace JSE.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
             if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
-            { StatusCode = 500 };
-            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" }) 
-                                                                                       { StatusCode =400 };
+            { StatusCode = 400 };
+            
             var userExists = await _context.Courier.Where(c => c.courier_username == register.courier_username).ToListAsync();
             if (userExists.Count == 0)
             {
                 register.courier_password = BCrypt.Net.BCrypt.EnhancedHashPassword(register.courier_password, 13);
-                var newCourrier = new Courier()
+                var newCourier = new Courier()
                 {
                     courier_username = register.courier_username,
                     courier_password = register.courier_password,
                 };
-                _context.Courier.Add(newCourrier);
+                _context.Courier.Add(newCourier);
                 await _context.SaveChangesAsync();
                 return Ok(register);
             }

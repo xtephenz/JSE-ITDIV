@@ -127,32 +127,31 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPatch("/update_status")]
+        [HttpPatch("/dispatch")]
         public async Task<IActionResult> DispatchPackage (String tracking_number)
         {
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
-                if (delivery.delivery_status == "on_sender_pool")
-                {
+                //if (delivery.delivery_status == "on_sender_pool")
+                //{
                     delivery.delivery_status = "dispatched";
-                    var newMessage = new GetMessageResult()
+                    var newMessage = new Message ()
                     {
                         message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
                         tracking_number = tracking_number,
                         timestamp = DateTime.Now,
                     };
 
-                    Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(newMessage);
-
-                    await _context.Message.AddAsync(processedMessageObject);
-                    await _context.SaveChangesAsync();
-                    return Ok(newMessage);
-                } else
-                {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
-                }
-                
+                GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                await _context.Message.AddAsync(newMessage);
+                await _context.SaveChangesAsync();
+                return Ok(result);
+                //}
+                //else
+                //{
+                    //return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                //}
             }
             catch (Exception ex)
             {

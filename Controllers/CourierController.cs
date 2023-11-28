@@ -131,7 +131,6 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPost]
         //[HttpPost("Cancel")]
         //public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
         //{

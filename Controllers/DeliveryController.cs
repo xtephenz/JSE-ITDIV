@@ -25,7 +25,7 @@ namespace JSE.Controllers
 
 
         //[HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
-        [HttpGet("get-by-admin-id")]
+        [HttpGet("get-by-admin-id")] 
         public async Task<IActionResult> GetDeliveries([FromBody] Guid admin_id)
         {
             try
@@ -128,7 +128,7 @@ namespace JSE.Controllers
         }
 
         [HttpPatch("/dispatch")]
-        public async Task<IActionResult> DispatchPackage (String tracking_number)
+        public async Task<IActionResult> NewDispatchToDestPool (String tracking_number)
         {
             try
             {
@@ -147,6 +147,130 @@ namespace JSE.Controllers
                 await _context.Message.AddAsync(newMessage);
                 await _context.SaveChangesAsync();
                 return Ok(result);
+                }
+                else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpPatch("/arrived")]
+        public async Task<IActionResult>NewArrivalAtDestPool(String tracking_number)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                if (delivery.delivery_status == "dispatched")
+                {
+                    delivery.delivery_status = "on_destination_pool";
+                    var newMessage = new Message()
+                    {
+                        message_text = $"Package has arrived at {delivery.pool_receiver_city} pool.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
+
+                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                    await _context.Message.AddAsync(newMessage);
+                    await _context.SaveChangesAsync();
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpPatch("/toReceiverAddress")]
+        public async Task<IActionResult> NewDispatchToReceiverAddr(String tracking_number)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                if (delivery.delivery_status == "on_destination_pool")
+                {
+                    delivery.delivery_status = "on_the_way_to_receiver_address";
+                    var newMessage = new Message()
+                    {
+                        message_text = $"Package is on the way to {delivery.receiver_address}.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
+
+                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                    await _context.Message.AddAsync(newMessage);
+                    await _context.SaveChangesAsync();
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpPatch("/successDelivery")]
+        public async Task<IActionResult> SuccessDelivery(String tracking_number)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                if (delivery.delivery_status == "on_the_way_to_receiver_address")
+                {
+                    delivery.delivery_status = "package_delivered";
+                    var newMessage = new Message()
+                    {
+                        message_text = $"Package is received by {delivery.actual_receiver_name}.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
+
+                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                    await _context.Message.AddAsync(newMessage);
+                    await _context.SaveChangesAsync();
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpPatch("/failedDelivery")]
+        public async Task<IActionResult> FailedDelivery(String tracking_number)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                if (delivery.delivery_status == "on_the_way_to_receiver_address")
+                {
+                    delivery.delivery_status = "delivery_failed";
+                    var newMessage = new Message()
+                    {
+                        message_text = $"Package is rejected.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
+
+                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                    await _context.Message.AddAsync(newMessage);
+                    await _context.SaveChangesAsync();
+                    return Ok(result);
                 }
                 else
                 {

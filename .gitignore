@@ -1,5 +1,5 @@
 ﻿.DS_Store
 .vs
-/obj
+obj/
 Migrations
-/bin
+bin/

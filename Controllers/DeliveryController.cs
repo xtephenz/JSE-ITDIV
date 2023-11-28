@@ -96,6 +96,7 @@ namespace JSE.Controllers
                 _context.Message.Add(processedMessageObject);
                 _context.Delivery.Add(processedDeliveryObject);
                 await _context.SaveChangesAsync();
+
                 return Ok(delivery);
             }
             catch (Exception ex)
@@ -103,7 +104,24 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
+        [HttpGet("/delivery{tracking_number}")]
+        public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
+        {
+            try
+            {
+                var deliveries = await _context.Delivery.FindAsync(tracking_number);
+                GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
+
+                //var result = deliveries.ReceiverPool.pool_phone
+                return Ok(deliveries);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
     }
 }
 

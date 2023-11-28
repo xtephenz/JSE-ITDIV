@@ -1,6 +1,7 @@
 ﻿using JSE.Data;
 using JSE.Models;
 using JSE.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,42 @@ namespace JSE.Controllers
             }
 
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUser([FromBody] CourierLoginRequest login)
+        {
+            var CheckUser = await _context.Courier.Where(c => c.courier_username == login.courier_username).ToListAsync();
+            if (CheckUser.Count > 0)
+            {
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.courier_password, CheckUser[0].courier_password);
+                // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
+                if (PasswordCheck)
+                {
+                    var token = CreateToken(login.courier_username, CheckUser[0].courier_id);
+                    var responseData = new { token = token };
+                    return new ObjectResult(responseData)
+                    {
+                        StatusCode = 200,
+                    };
+                }
+                else
+                {
+                    var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
+                    return new ObjectResult(responseData)
+                    {
+                        StatusCode = 401,
+                    };
+                }
+            }
+            else
+            {
+                var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
+                return new ObjectResult(responseData)
+                {
+                    StatusCode = 401,
+                };
+            }
+        }
         private string CreateToken(String Email, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
@@ -79,6 +116,23 @@ namespace JSE.Controllers
             return jwt;
         }
 
+        [HttpGet(""), Authorize(Roles = "Courier")]
+        public async Task<IActionResult> GetDeliveryListCourier(GetDeliveryListByCourier courier)
+        {
+            try
+            {
+                var DeliveryList = await _context.Courier.Where(c => c.courier_id == courier.courier_id).ToListAsync();
+                return new ObjectResult(DeliveryList)
+                {
+                    StatusCode = 200
+                };
+            } catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+
+        [HttpPost]
         //[HttpPost("Cancel")]
         //public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
         //{

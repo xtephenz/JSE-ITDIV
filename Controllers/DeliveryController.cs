@@ -126,6 +126,33 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+        [HttpPatch("/dispatch")]
+
+        public async Task<IActionResult> DispatchPackage (String tracking_number)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                delivery.delivery_status = "dispatched";
+                var newMessage = new GetMessageResult()
+                {
+                    message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
+                    tracking_number = tracking_number,
+                    timestamp = DateTime.Now,
+                };
+
+                Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(newMessage);
+
+                await _context.Message.AddAsync(processedMessageObject);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
     }
 }
 

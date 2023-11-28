@@ -82,7 +82,7 @@ namespace JSE.Controllers
                 string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";
 
                 delivery.tracking_number = trackingNumber;
-                delivery.delivery_status = "on_process";
+                delivery.delivery_status = "on_sender_pool";
 
                 var message = new GetMessageResult()
                 {
@@ -127,26 +127,32 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPatch("/dispatch")]
-
+        [HttpPatch("/update_status")]
         public async Task<IActionResult> DispatchPackage (String tracking_number)
         {
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
-                delivery.delivery_status = "dispatched";
-                var newMessage = new GetMessageResult()
+                if (delivery.delivery_status == "on_sender_pool")
                 {
-                    message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
-                    tracking_number = tracking_number,
-                    timestamp = DateTime.Now,
-                };
+                    delivery.delivery_status = "dispatched";
+                    var newMessage = new GetMessageResult()
+                    {
+                        message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
 
-                Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(newMessage);
+                    Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(newMessage);
 
-                await _context.Message.AddAsync(processedMessageObject);
-                await _context.SaveChangesAsync();
-                return Ok();
+                    await _context.Message.AddAsync(processedMessageObject);
+                    await _context.SaveChangesAsync();
+                    return Ok(newMessage);
+                } else
+                {
+                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                }
+                
             }
             catch (Exception ex)
             {

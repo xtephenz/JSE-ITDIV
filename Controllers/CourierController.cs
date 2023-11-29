@@ -105,10 +105,10 @@ namespace JSE.Controllers
                 };
             }
         }
-        private string CreateToken(String Email, Guid UserId)
+        private string CreateToken(String username, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("courier_username", Email.ToString()),
+                new Claim("courier_username", username.ToString()),
                 new Claim("courier_id", UserId.ToString()),
                 new Claim(ClaimTypes.Role, "Courier"),
             };

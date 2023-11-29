@@ -127,8 +127,32 @@ namespace JSE.Controllers
             }
         }
 
+        [HttpGet("/delivery/pool_city/{pool_name}")]
+        public async Task<IActionResult> GetByPoolCity(String pool_name) //FromBody itu json
+        {
+            try
+            {
+                var checkPool = await _context.PoolBranch.FindAsync(pool_name);
+                if (checkPool == null) return BadRequest("Invalid pool!");
+                var deliveries = await _context.Delivery
+                    .Include(d => d.SenderPool)
+                    .Include(d => d.ReceiverPool)
+                    .Include(d => d.Messages)
+                    .Where(d => d.pool_receiver_city == pool_name || d.pool_sender_city == pool_name).ToListAsync();
+                List<GetDeliveryResult> processedDeliveryList = _mapper.Map<List<Delivery>, List<GetDeliveryResult>>(deliveries);
+
+                return Ok(processedDeliveryList);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
+
+
         [HttpPatch("/dispatch")]
-        public async Task<IActionResult> NewDispatchToDestPool (String tracking_number)
+        public async Task<IActionResult> NewDispatchToDestPool(String tracking_number)
         {
             try
             {
@@ -150,7 +174,7 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
                 }
             }
             catch (Exception ex)
@@ -159,7 +183,7 @@ namespace JSE.Controllers
             }
         }
         [HttpPatch("/arrived")]
-        public async Task<IActionResult>NewArrivalAtDestPool(String tracking_number)
+        public async Task<IActionResult> NewArrivalAtDestPool(String tracking_number)
         {
             try
             {
@@ -189,42 +213,76 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpPatch("/toReceiverAddress")] // HAVE TO ASSIGN TO COURIER
-        public async Task<IActionResult> NewDispatchToReceiverAddr(String tracking_number)
+        /*[HttpPatch("/toReceiverAddress")] */// auto assign on arrive -> prio and reg services becomes obsolete. have to revise.
+        //public async Task<IActionResult> NewDispatchToReceiverAddr(String tracking_number)
+        //{
+        //    try
+        //    {
+        //        var available_courier = await _context.Courier.Where(c => c.courier_availability == true).FirstAsync();
+
+        //        var delivery = await _context.Delivery.FindAsync(tracking_number);
+        //        if (delivery.delivery_status == "on_destination_pool")
+        //        {
+        //            delivery.delivery_status = "otw_receiver_address";
+        //            available_courier.courier_availability = false;
+        //            delivery.courier_id = available_courier.courier_id;
+
+        //            var newMessage = new Message()
+        //            {
+        //                message_text = $"Your package is with courier {available_courier.courier_username} and is on the way to {delivery.receiver_address}.",
+        //                tracking_number = tracking_number,
+        //                timestamp = DateTime.Now,
+        //            };
+
+        //            GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+        //            await _context.Message.AddAsync(newMessage);
+        //            await _context.SaveChangesAsync();
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex);
+        //    }
+        //}
+        [HttpPost("/assignDeliveries")]
+        public async Task<IActionResult> AssignDeliveriesToCourier()
         {
             try
             {
-                var available_courier = await _context.Courier.Where(c => c.courier_availability == true).FirstAsync();
-                
-                var delivery = await _context.Delivery.FindAsync(tracking_number);
-                if (delivery.delivery_status == "on_destination_pool")
-                {
-                    delivery.delivery_status = "otw_receiver_address";
-                    available_courier.courier_availability = false;
-                    delivery.courier_id = available_courier.courier_id;
-                    
-                    var newMessage = new Message()
-                    {
-                        message_text = $"Your package is with courier {available_courier.courier_username} and is on the way to {delivery.receiver_address}.",
-                        tracking_number = tracking_number,
-                        timestamp = DateTime.Now,
-                    };
+                // fetch all deliveries that are on pool.
+                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
+                var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
-                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
-                    await _context.Message.AddAsync(newMessage);
-                    await _context.SaveChangesAsync();
-                    return Ok(result);
-                }
-                else
+                var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
+                for (int i = 0; i < availableCouriers.Count; i++)
                 {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    try
+                    {
+                        combinedPrioritizedDeliveries[i].courier_id = availableCouriers[i].courier_id;
+                        availableCouriers[i].courier_availability = false;
+                    }
+                    catch (IndexOutOfRangeException ex)
+                    {
+                        break;
+                    }
                 }
+                await _context.SaveChangesAsync();
+
+                return Ok("Deliveries assigned to courier!");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return BadRequest(ex);
             }
         }
+        
         [HttpPatch("/successDelivery")] // COURIER PENCET
         public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
         {
@@ -236,6 +294,7 @@ namespace JSE.Controllers
                     delivery.delivery_status = "package_delivered";
                     delivery.actual_receiver_name = receiver_name;
                     delivery.Courier.courier_availability = true;
+                    delivery.arrival_date = DateTime.Now;
                     var newMessage = new Message()
                     {
                         message_text = $"Package is received by {receiver_name}.",
@@ -281,7 +340,7 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
                 }
             }
             catch (Exception ex)

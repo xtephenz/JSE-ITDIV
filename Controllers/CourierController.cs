@@ -128,15 +128,12 @@ namespace JSE.Controllers
             return jwt;
         }
 
-        //[HttpGet(""), Authorize(Roles = "Courier")]
-        [HttpGet("")]
-        public async Task<IActionResult> GetDeliveryListCourier(Guid courier_id)
+        [HttpGet(""), Authorize(Roles = "Courier")]//courier_history
+        public async Task<IActionResult> GetDeliveryListCourier(GetDeliveryListByCourier courier)
         {
             try
             {
-                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id)
-                    .ProjectTo<GetDeliveryListCourier>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
+                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier.courier_id).ToListAsync();
                 return new ObjectResult(DeliveryList)
                 {
                     StatusCode = 200

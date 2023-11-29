@@ -94,10 +94,8 @@ namespace JSE.Controllers
                 string shipmentDate = delivery.sending_date.ToString("ddMMyy");
                 string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";
 
-                delivery.tracking_number = trackingNumber;
-                delivery.delivery_status = "on_sender_pool";
 
-                var message = new GetMessageResult()
+                var message = new Message()
                 {
                     tracking_number = trackingNumber,
                     message_text = $"Package received at {delivery.pool_sender_city} pool.",
@@ -105,12 +103,15 @@ namespace JSE.Controllers
                 };
                 Delivery processedDeliveryObject = _mapper.Map<CreateDelivery, Delivery>(delivery);
 
-                Message processedMessageObject = _mapper.Map<GetMessageResult, Message>(message);
-                _context.Message.Add(processedMessageObject);
-                _context.Delivery.Add(processedDeliveryObject);
+                processedDeliveryObject.tracking_number = trackingNumber;
+                processedDeliveryObject.delivery_status = "on_sender_pool";
+
+                await _context.Message.AddAsync(message);
+                await _context.Delivery.AddAsync(processedDeliveryObject);
                 await _context.SaveChangesAsync();
 
-                return Ok(delivery);
+                GetDeliveryResult output = _mapper.Map<Delivery, GetDeliveryResult>(processedDeliveryObject);
+                return Ok(output);
             }
             catch (Exception ex)
             {
@@ -274,11 +275,14 @@ namespace JSE.Controllers
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
+                //return Ok(availableCouriers);
                 for (int i = 0; i < availableCouriers.Count; i++)
                 {
+                    if (combinedPrioritizedDeliveries.Count == i) break;
                     try
                     {
                         combinedPrioritizedDeliveries[i].courier_id = availableCouriers[i].courier_id;
+                        combinedPrioritizedDeliveries[i].delivery_status = "otw_receiver_address";
                         availableCouriers[i].courier_availability = false;
                     }
                     catch (IndexOutOfRangeException ex)

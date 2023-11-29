@@ -100,9 +100,9 @@ namespace JSE.Controllers
         private string CreateToken(String Email, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("admin_username", Email.ToString()),
-                new Claim("admin_id", UserId.ToString()),
-                new Claim(ClaimTypes.Role, "Admin"),
+                new Claim("courier_username", Email.ToString()),
+                new Claim("courier_id", UserId.ToString()),
+                new Claim(ClaimTypes.Role, "Courier"),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(

@@ -59,6 +59,9 @@ namespace JSE.Controllers
             }
 
         }
+        
+
+        
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
         {
@@ -95,10 +98,10 @@ namespace JSE.Controllers
         }
 
 
-        private string CreateToken(String Email, Guid UserId)
+        private string CreateToken(String Username, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("admin_username", Email.ToString()),
+                new Claim("admin_username", Username.ToString()),
                 new Claim("admin_id", UserId.ToString()),
                 new Claim(ClaimTypes.Role, "Admin"),
             };

@@ -13,10 +13,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper.QueryableExtensions;
+
 
 namespace JSE.Controllers
 {
-    [Route("auth/courier")]
+    [Route("courier")]
     [ApiController]
     public class CourierController : Controller
     {
@@ -129,15 +131,14 @@ namespace JSE.Controllers
         }
 
         //[HttpGet(""), Authorize(Roles = "Courier")]
-        [HttpGet("")]
+        [HttpGet("history")]
         public async Task<IActionResult> GetDeliveryListCourier(Guid courier_id)
         {
             try
             {
-                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id)
-                    .ProjectTo<GetDeliveryListCourier>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
-                return new ObjectResult(DeliveryList)
+                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id).ToListAsync();
+                List<GetDeliveryListCourier> ProcessedList = _mapper.Map<List<Delivery>, List<GetDeliveryListCourier>>(DeliveryList);
+                return new ObjectResult(ProcessedList)
                 {
                     StatusCode = 200
                 };

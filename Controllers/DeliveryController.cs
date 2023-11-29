@@ -226,18 +226,19 @@ namespace JSE.Controllers
             }
         }
         [HttpPatch("/successDelivery")] // COURIER PENCET
-        public async Task<IActionResult> SuccessDelivery(String tracking_number)
+        public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
         {
             try
             {
-                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == tracking_number).FirstAsync();
                 if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "package_delivered";
+                    delivery.actual_receiver_name = receiver_name;
                     delivery.Courier.courier_availability = true;
                     var newMessage = new Message()
                     {
-                        message_text = $"Package is received by {delivery.actual_receiver_name}.",
+                        message_text = $"Package is received by {receiver_name}.",
                         tracking_number = tracking_number,
                         timestamp = DateTime.Now,
                     };
@@ -258,7 +259,7 @@ namespace JSE.Controllers
             }
         }
         [HttpPatch("/failedDelivery")]
-        public async Task<IActionResult> FailedDelivery(String tracking_number)
+        public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {
             try
             {
@@ -268,7 +269,7 @@ namespace JSE.Controllers
                     delivery.delivery_status = "delivery_failed";
                     var newMessage = new Message()
                     {
-                        message_text = $"Package is rejected.",
+                        message_text = $"Package is rejected. \"{courier_message}\"",
                         tracking_number = tracking_number,
                         timestamp = DateTime.Now,
                     };

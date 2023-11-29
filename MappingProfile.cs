@@ -18,6 +18,8 @@ namespace JSE
             CreateMap<PoolBranch, GetPoolResult>();
             CreateMap<Message, GetMessageResult>();
 
+            CreateMap<Delivery, GetDeliveryListCourier>();
+
             CreateMap<CreateDelivery, Delivery>();
             CreateMap<GetMessageResult, Message>();
         }

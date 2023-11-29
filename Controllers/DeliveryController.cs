@@ -47,15 +47,8 @@ namespace JSE.Controllers
         {
             try
             {
-                var current_delivery = _context.Delivery.Where(c => c.courier_id == courier_id &&
-                c.delivery_status == "dispatched"
-                ).First();
-
-
-                return new ObjectResult(current_delivery)
-                {
-                    StatusCode = 200
-                };
+                var current_delivery = await _context.Delivery.Where(c => c.courier_id == courier_id && c.delivery_status == "on_destination_pool").FirstAsync();
+                return Ok(current_delivery);
             }
             catch (Exception ex)
             {

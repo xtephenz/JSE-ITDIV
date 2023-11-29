@@ -136,7 +136,7 @@ namespace JSE.Controllers
                 if (delivery.delivery_status == "on_sender_pool")
                 {
                     delivery.delivery_status = "dispatched";
-                    var newMessage = new Message ()
+                    var newMessage = new Message()
                     {
                         message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
                         tracking_number = tracking_number,
@@ -189,18 +189,21 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpPatch("/toReceiverAddress")]
+        [HttpPatch("/toReceiverAddress")] // HAVE TO ASSIGN TO COURIER
         public async Task<IActionResult> NewDispatchToReceiverAddr(String tracking_number)
         {
             try
             {
+                var available_courier = await _context.Courier.Where(c => c.courier_availability == true).FirstAsync();
+                
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
                 if (delivery.delivery_status == "on_destination_pool")
                 {
-                    delivery.delivery_status = "on_the_way_to_receiver_address";
+                    delivery.delivery_status = "otw_receiver_address";
+                    delivery.courier_id = available_courier.courier_id;
                     var newMessage = new Message()
                     {
-                        message_text = $"Package is on the way to {delivery.receiver_address}.",
+                        message_text = $"Your package is with courier {available_courier.courier_username} and is on the way to {delivery.receiver_address}.",
                         tracking_number = tracking_number,
                         timestamp = DateTime.Now,
                     };
@@ -220,13 +223,13 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpPatch("/successDelivery")]
+        [HttpPatch("/successDelivery")] // COURIER PENCET
         public async Task<IActionResult> SuccessDelivery(String tracking_number)
         {
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
-                if (delivery.delivery_status == "on_the_way_to_receiver_address")
+                if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "package_delivered";
                     var newMessage = new Message()
@@ -257,7 +260,7 @@ namespace JSE.Controllers
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
-                if (delivery.delivery_status == "on_the_way_to_receiver_address")
+                if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "delivery_failed";
                     var newMessage = new Message()
@@ -281,6 +284,45 @@ namespace JSE.Controllers
             {
                 return StatusCode(500, ex);
             }
+        }
+
+        //[HttpPatch("/update")]
+        //public async Task <IActionResult> UpdatePackageStatus ([FromBody] string tracking_number, string package_status)
+        //{
+        //    var message = new Message();
+        //    switch (package_status)
+        //    {
+        //        case "on_sender_pool":
+
+                    
+        //    }
+        //    try
+        //    {
+        //        var delivery = await _context.Delivery.FindAsync(tracking_number);
+        //        if (delivery.delivery_status == "on_sender_pool")
+        //        {
+        //            delivery.delivery_status = "dispatched";
+        //            var newMessage = new Message()
+        //            {
+        //                message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
+        //                tracking_number = tracking_number,
+        //                timestamp = DateTime.Now,
+        //            };
+
+        //            GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+        //            await _context.Message.AddAsync(newMessage);
+        //            await _context.SaveChangesAsync();
+        //            return Ok(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex);
+        //    }
         }
     }
 }

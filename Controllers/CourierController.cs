@@ -26,6 +26,13 @@ namespace JSE.Controllers
             _configuration = configuration;
             _context = context;
         }
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllCouriers()
+        {
+            var couriers = await _context.Courier.ToListAsync();
+            return Ok(couriers);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {

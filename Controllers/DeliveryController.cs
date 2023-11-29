@@ -200,7 +200,9 @@ namespace JSE.Controllers
                 if (delivery.delivery_status == "on_destination_pool")
                 {
                     delivery.delivery_status = "otw_receiver_address";
+                    available_courier.courier_availability = false;
                     delivery.courier_id = available_courier.courier_id;
+                    
                     var newMessage = new Message()
                     {
                         message_text = $"Your package is with courier {available_courier.courier_username} and is on the way to {delivery.receiver_address}.",
@@ -232,6 +234,7 @@ namespace JSE.Controllers
                 if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "package_delivered";
+                    delivery.Courier.courier_availability = true;
                     var newMessage = new Message()
                     {
                         message_text = $"Package is received by {delivery.actual_receiver_name}.",
@@ -323,7 +326,7 @@ namespace JSE.Controllers
         //    {
         //        return StatusCode(500, ex);
         //    }
-        }
+        
     }
 }
 

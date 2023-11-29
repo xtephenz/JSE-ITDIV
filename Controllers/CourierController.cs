@@ -1,6 +1,9 @@
-﻿using JSE.Data;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using JSE.Data;
 using JSE.Models;
 using JSE.Models.Requests;
+using JSE.Models.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +22,15 @@ namespace JSE.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public CourierController(IConfiguration configuration, AppDbContext context)
+
+        public CourierController(IConfiguration configuration, IMapper mapper, AppDbContext context)
 
         {
             _configuration = configuration;
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet("all")]
         public async Task<IActionResult> GetAllCouriers()
@@ -122,12 +128,15 @@ namespace JSE.Controllers
             return jwt;
         }
 
-        [HttpGet(""), Authorize(Roles = "Courier")]
-        public async Task<IActionResult> GetDeliveryListCourier(GetDeliveryListByCourier courier)
+        //[HttpGet(""), Authorize(Roles = "Courier")]
+        [HttpGet("")]
+        public async Task<IActionResult> GetDeliveryListCourier(Guid courier_id)
         {
             try
             {
-                var DeliveryList = await _context.Courier.Where(c => c.courier_id == courier.courier_id).ToListAsync();
+                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id)
+                    .ProjectTo<GetDeliveryListCourier>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
                 return new ObjectResult(DeliveryList)
                 {
                     StatusCode = 200

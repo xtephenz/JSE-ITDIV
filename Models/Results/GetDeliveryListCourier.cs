@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JSE.Models.Requests
 {
-	public class GetDeliveryListByCourier
+	public class GetDeliveryListCourier
 	{
 		public string tracking_number;
 

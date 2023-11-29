@@ -42,6 +42,26 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
+        [HttpGet("current_delivery")]
+        public async Task<IActionResult> GetCurrentDeliveryCourier(Guid courier_id)
+        {
+            try
+            {
+                var current_delivery = _context.Delivery.Where(c => c.courier_id == courier_id &&
+                c.delivery_status == "dispatched"
+                ).First();
+
+
+                return new ObjectResult(current_delivery)
+                {
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(404, ex);
+            }
+        }
         [HttpGet("/delivery")]
         public async Task<IActionResult> GetAllDeliveries()
         {
@@ -56,7 +76,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode(404, ex);
             }
         }
 

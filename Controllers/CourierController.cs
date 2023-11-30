@@ -55,6 +55,7 @@ namespace JSE.Controllers
                 {
                     courier_username = register.courier_username,
                     courier_password = register.courier_password,
+                    courier_phone = register.courier_phone,
                 };
                 _context.Courier.Add(newCourier);
                 await _context.SaveChangesAsync();

@@ -278,7 +278,11 @@ namespace JSE.Controllers
                 //return Ok(availableCouriers);
                 for (int i = 0; i < availableCouriers.Count; i++)
                 {
-                    if (combinedPrioritizedDeliveries.Count == i) break;
+                    if (combinedPrioritizedDeliveries.Count == i)
+                    {
+                        break;
+                    }
+
                     try
                     {
                         combinedPrioritizedDeliveries[i].courier_id = availableCouriers[i].courier_id;

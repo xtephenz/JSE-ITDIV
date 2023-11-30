@@ -14,6 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper.QueryableExtensions;
+using Microsoft.Extensions.Hosting;
 
 
 namespace JSE.Controllers
@@ -106,6 +107,41 @@ namespace JSE.Controllers
                 };
             }
         }
+
+        [HttpPost("sendImage")]
+        public IActionResult SendImage(IFormFile image, string trackingNumber)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest("Invalid image file");
+
+            var delivery = _context.Delivery.Find(trackingNumber);
+
+            if (delivery == null)
+                return NotFound("Delivery not found");
+
+            var imagePath = SaveImage(image);
+
+            delivery.imagePath = imagePath;
+            _context.SaveChanges();
+
+            return Ok("Image sent successfully");
+        }
+
+        private string SaveImage(IFormFile image)
+        {
+            var uniqueFileName = $"{Guid.NewGuid().ToString()}_{image.FileName}";
+            var filePath = Path.Combine("images", uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                image.CopyTo(fileStream);
+            }
+
+            return uniqueFileName;
+        }
+
+
+
         private string CreateToken(String username, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {

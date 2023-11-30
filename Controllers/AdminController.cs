@@ -96,7 +96,7 @@ namespace JSE.Controllers
                 };
             }
         }
-
+        
 
         private string CreateToken(String Username, Guid UserId)
         {

@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using BCrypt;
 using Microsoft.Extensions.Hosting;
+// ngentit
 
 namespace JSE.Controllers
 {

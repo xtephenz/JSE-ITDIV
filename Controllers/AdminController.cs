@@ -66,14 +66,14 @@ namespace JSE.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
         {
-            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).ToListAsync();
-            if (CheckUser.Count > 0)
+            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).FirstOrDefaultAsync();
+            if (CheckUser != null)
             {
-                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser[0].admin_password);
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser.admin_password);
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.admin_username, CheckUser[0].admin_id);
+                    var token = CreateToken(login.admin_username, CheckUser.admin_id);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData) {
                         StatusCode = 200,
@@ -98,24 +98,24 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPost("receiveImageFromCourier")]
-        public IActionResult ReceiveImageFromCourier(IFormFile image, string trackingNumber)
-        {
-            if (image == null || image.Length == 0)
-                return BadRequest("Invalid image file");
+        //[HttpPost("receiveImageFromCourier")]
+        //public IActionResult ReceiveImageFromCourier(IFormFile image, string trackingNumber)
+        //{
+        //    if (image == null || image.Length == 0)
+        //        return BadRequest("Invalid image file");
 
-            var delivery = _context.Delivery.Find(trackingNumber);
+        //    var delivery = _context.Delivery.Find(trackingNumber);
 
-            if (delivery == null)
-                return NotFound("Delivery not found");
+        //    if (delivery == null)
+        //        return NotFound("Delivery not found");
 
-            var imagePath = SaveImage(image);
+        //    var imagePath = SaveImage(image);
 
-            delivery.imagePath = imagePath;
-            _context.SaveChanges();
+        //    delivery.imagePath = imagePath;
+        //    _context.SaveChanges();
 
-            return Ok("Image received successfully");
-        }
+        //    return Ok("Image received successfully");
+        //}
 
         private string SaveImage(IFormFile image)
         {

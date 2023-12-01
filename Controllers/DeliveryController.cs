@@ -7,6 +7,7 @@ using JSE.Models.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Nodes;
 
@@ -46,7 +47,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
         
@@ -101,16 +102,17 @@ namespace JSE.Controllers
                 processedDeliveryObject.tracking_number = trackingNumber;
                 processedDeliveryObject.delivery_status = "on_sender_pool";
 
+                var output = _mapper.Map<GetDeliveryResult>(processedDeliveryObject);
+
                 await _context.Message.AddAsync(message);
                 await _context.Delivery.AddAsync(processedDeliveryObject);
                 await _context.SaveChangesAsync();
 
-                GetDeliveryResult output = _mapper.Map<Delivery, GetDeliveryResult>(processedDeliveryObject);
                 return Ok(output);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);
             }
         }
 
@@ -136,7 +138,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
 
@@ -168,7 +170,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
         [HttpPatch("/arrived")] //admin
@@ -199,7 +201,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
         /*[HttpPatch("/toReceiverAddress")] */// auto assign on arrive -> prio and reg services becomes obsolete. have to revise.
@@ -235,7 +237,7 @@ namespace JSE.Controllers
         //    }
         //    catch (Exception ex)
         //    {
-        //        return StatusCode(500, ex);
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
         //    }
         //}
         [HttpPost("/assignDeliveries")] //admin pencetd
@@ -283,7 +285,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);
             }
         }
         
@@ -318,7 +320,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
 
@@ -351,7 +353,7 @@ namespace JSE.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
         

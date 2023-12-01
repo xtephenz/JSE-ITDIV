@@ -40,7 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                 builder.Configuration.GetSection("JwtSettings:Key").Value!))
     };
 });
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
@@ -49,7 +49,6 @@ builder.Services.AddControllers()
                 options.JsonSerializerOptions.ReferenceHandler = null;
 
             });
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<AppDbContext>(
     options =>
     {

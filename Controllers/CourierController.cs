@@ -151,7 +151,7 @@ namespace JSE.Controllers
                 };
             } catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
         [HttpGet("current_delivery"), Authorize]
@@ -178,6 +178,53 @@ namespace JSE.Controllers
             }
         }
 
+    //    [HttpPost("request_delivery"), Authorize]
+    //    public async Task<IActionResult> RequestDelivery()
+    //    {
+    //        try
+    //        {
+
+    //        } catch (Exception ex)
+    //        var courier_id = new Guid(User?.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
+    //        // fetch all deliveries that are on pool.
+    //        var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
+    //        var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
+    //        var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
+    //        var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
+
+    //        var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
+    //        //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
+    //        //return Ok(availableCouriers);
+    //        for (int i = 0; i < availableCouriers.Count; i++)
+    //        {
+    //            // if deliveries is smaller than number of couriers end loop;
+    //            if (combinedPrioritizedDeliveries.Count == i) break;
+    //            // if deliveries is more than number of couriers, continue.
+    //            try
+    //            {
+    //                var delivery = combinedPrioritizedDeliveries[i];
+    //                var courier = availableCouriers[i];
+    //                delivery.courier_id = availableCouriers[i].courier_id;
+    //                delivery.delivery_status = "otw_receiver_address";
+    //                availableCouriers[i].courier_availability = false;
+    //                var message = new Message()
+    //                {
+    //                    tracking_number = delivery.tracking_number,
+    //                    message_text = $"Package is with courier {courier.courier_username} and is on the way to {delivery.receiver_address}",
+    //                    timestamp = DateTime.Now,
+    //                };
+    //                await _context.Message.AddAsync(message);
+    //            }
+    //            catch (Exception exc)
+    //            {
+    //                continue;
+    //            }
+    //        }
+    //        await _context.SaveChangesAsync();
+
+    //        return Ok("Deliveries assigned to courier!");
+    //    }
+    //}
         //[HttpPost("Cancel")]
         //public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
         //{

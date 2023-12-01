@@ -21,20 +21,22 @@ namespace JSE
                     pool_phone = src.ReceiverPool.pool_phone,
                 }))
                 .ForMember(dest => dest.Messages, opt => opt.MapFrom(src => src.Messages))
-                .ForMember(dest => dest.Courier, opt => opt.MapFrom(src => new GetCourierResult()
-                {
-                    courier_username = src.Courier.courier_username,
-                    courier_phone = src.Courier.courier_phone,
-                }));
-
+                .ForMember(dest => dest.Courier, opt => {
+                    opt.PreCondition(src => (src.Courier != null));
+                    opt.MapFrom(src => new GetCourierResult() { 
+                        courier_username = src.Courier.courier_username, 
+                        courier_phone = src.Courier.courier_phone 
+                    }); 
+                });
             CreateMap<PoolBranch, GetPoolResult>();
             CreateMap<Courier, GetCourierResult>();
             CreateMap<Message, GetMessageResult>();
 
-            CreateProjection<Delivery, GetDeliveryResult>();
+            //CreateProjection<Delivery, GetDeliveryResult>();
             CreateMap<Delivery, GetDeliveryListCourier>();
 
             CreateMap<CreateDelivery, Delivery>();
+            CreateMap<Delivery, GetDeliveryResult>();
             CreateMap<GetMessageResult, Message>();
 
             //AssertConfigurationIsValid();

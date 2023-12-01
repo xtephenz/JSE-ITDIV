@@ -46,6 +46,18 @@ namespace JSE.Controllers
             var courierData = User?.Identity?.Name;
             return Ok(new { courierData });
         }
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST
+        ///     {
+        ///         "courier_username": "meerkat",
+        ///         "courier_password": "Bl@ck$",
+        ///         "courier_confirm_password": "Bl@ck$",
+        ///         "courier_phone": "111111"
+        ///     }
+        /// </remarks>
+        /// <param name="register"></param>
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
@@ -75,7 +87,16 @@ namespace JSE.Controllers
             }
 
         }
-
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST
+        ///     {
+        ///         "courier_username": "meerkat",
+        ///         "courier_password": "Bl@ck$"
+        ///     }
+        /// </remarks>
+        /// <param name="login"></param>
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] CourierLoginRequest login)
         {

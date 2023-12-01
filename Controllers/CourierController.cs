@@ -63,7 +63,7 @@ namespace JSE.Controllers
         {
             if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
             { StatusCode = 400 };
-            
+
             var userExists = await _context.Courier.Where(c => c.courier_username == register.courier_username).ToListAsync();
             if (userExists.Count == 0)
             {
@@ -172,7 +172,7 @@ namespace JSE.Controllers
                 };
             } catch (Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
+                return StatusCode(500, ex.InnerException.Message);
             }
         }
         [HttpGet("current_delivery"), Authorize]
@@ -199,53 +199,54 @@ namespace JSE.Controllers
             }
         }
 
-    //    [HttpPost("request_delivery"), Authorize]
-    //    public async Task<IActionResult> RequestDelivery()
-    //    {
-    //        try
-    //        {
+        [HttpPost("request_delivery"), Authorize]
+        public async Task<IActionResult> RequestDelivery()
+        {
+            try
+            {
+                var courier_id = new Guid(User?.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
+                var courier_username = User?.Identity?.Name;
 
-    //        } catch (Exception ex)
-    //        var courier_id = new Guid(User?.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-    //        // fetch all deliveries that are on pool.
-    //        var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
-    //        var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
-    //        var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
-    //        var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
+                var courier_data = await _context.Courier.Where(c => c.courier_id == courier_id).FirstOrDefaultAsync();
 
-    //        var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
-    //        //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
-    //        //return Ok(availableCouriers);
-    //        for (int i = 0; i < availableCouriers.Count; i++)
-    //        {
-    //            // if deliveries is smaller than number of couriers end loop;
-    //            if (combinedPrioritizedDeliveries.Count == i) break;
-    //            // if deliveries is more than number of couriers, continue.
-    //            try
-    //            {
-    //                var delivery = combinedPrioritizedDeliveries[i];
-    //                var courier = availableCouriers[i];
-    //                delivery.courier_id = availableCouriers[i].courier_id;
-    //                delivery.delivery_status = "otw_receiver_address";
-    //                availableCouriers[i].courier_availability = false;
-    //                var message = new Message()
-    //                {
-    //                    tracking_number = delivery.tracking_number,
-    //                    message_text = $"Package is with courier {courier.courier_username} and is on the way to {delivery.receiver_address}",
-    //                    timestamp = DateTime.Now,
-    //                };
-    //                await _context.Message.AddAsync(message);
-    //            }
-    //            catch (Exception exc)
-    //            {
-    //                continue;
-    //            }
-    //        }
-    //        await _context.SaveChangesAsync();
+                // fetch all deliveries that are on pool.
+                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
 
-    //        return Ok("Deliveries assigned to courier!");
-    //    }
-    //}
+                if (deliveriesOnPool.Count == 0) return NotFound(new { message = "There are no pending deliveries at the moment!" });
+
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
+                var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
+
+                //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
+                //return Ok(availableCouriers);
+                // if deliveries is smaller than number of couriers end loop;
+                // if deliveries is more than number of couriers, continue.
+                var delivery = combinedPrioritizedDeliveries[0];
+                delivery.courier_id = courier_id;
+                delivery.delivery_status = "otw_receiver_address";
+                courier_data.courier_availability = false;
+                var message = new Message()
+                {
+                    tracking_number = delivery.tracking_number,
+                    message_text = $"Package is with courier {courier_username} and is on the way to {delivery.receiver_address}",
+                    timestamp = DateTime.Now,
+                };
+                await _context.Message.AddAsync(message);
+                await _context.SaveChangesAsync();
+
+                GetDeliveryResult responseDelivery = _mapper.Map<GetDeliveryResult>(delivery);
+
+                return Ok(responseDelivery);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.InnerException.Message);
+            }
+
+    }
+
+}
         //[HttpPost("Cancel")]
         //public async Task<IActionResult> CancelRequest([FromBody] GetCancelRequest cancel)
         //{
@@ -257,5 +258,5 @@ namespace JSE.Controllers
         //    }
 
         //}
-    }
+    
 }

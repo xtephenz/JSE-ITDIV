@@ -95,7 +95,7 @@ namespace JSE.Controllers
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.admin_username, CheckUser.admin_id);
+                    var token = CreateToken(login.admin_username, CheckUser.admin_id, CheckUser.pool_city);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData) {
                         StatusCode = 200,
@@ -151,11 +151,12 @@ namespace JSE.Controllers
 
             return uniqueFileName;
         }
-        private string CreateToken(String Username, Guid UserId)
+        private string CreateToken(String Username, Guid UserId, String pool_city)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("admin_username", Username.ToString()),
-                new Claim("admin_id", UserId.ToString()),
+                new Claim(ClaimTypes.Name, Username.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
+                new Claim("pool_city", pool_city.ToString()),
                 new Claim(ClaimTypes.Role, "Admin"),
             };
 

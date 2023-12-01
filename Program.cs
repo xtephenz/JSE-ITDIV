@@ -55,7 +55,6 @@ builder.Services.AddDbContext<AppDbContext>(
         options.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection"));
     }
 );
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

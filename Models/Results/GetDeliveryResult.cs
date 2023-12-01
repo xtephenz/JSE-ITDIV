@@ -28,7 +28,7 @@ namespace JSE.Models.Results
 
         // package descriptions
         public string service_type { get; set; }
-        public int package_weight { get; set; }
+        //public int package_weight { get; set; }
         public int delivery_price { get; set; }
 
         public string delivery_status { get; set; }

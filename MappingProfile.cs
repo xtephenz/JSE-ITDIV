@@ -9,19 +9,21 @@ namespace JSE
     {
         public MappingProfile()
         {
-            CreateMap<Delivery, GetDeliveryResult>().ForMember(
-                dest => dest.SenderPool, opt => opt.MapFrom(src => src.SenderPool)
-            ).ForMember(
-                dest => dest.ReceiverPool, opt => opt.MapFrom(src => src.ReceiverPool)
-            ).ForMember(
-                dest => dest.Messages, opt => opt.MapFrom(src => src.Messages));
+            CreateMap<Delivery, GetDeliveryResult>()
+                .ForMember(dest => dest.SenderPool, opt => opt.MapFrom(src => src.SenderPool))
+                .ForMember(dest => dest.ReceiverPool, opt => opt.MapFrom(src => src.ReceiverPool))
+                .ForMember(dest => dest.Messages, opt => opt.MapFrom(src => src.Messages));
+
             CreateMap<PoolBranch, GetPoolResult>();
             CreateMap<Message, GetMessageResult>();
+            CreateMap<Courier, GetCourierResult>();
+            
 
             CreateMap<Delivery, GetDeliveryListCourier>();
 
             CreateMap<CreateDelivery, Delivery>();
             CreateMap<GetMessageResult, Message>();
         }
+        
     }
 }

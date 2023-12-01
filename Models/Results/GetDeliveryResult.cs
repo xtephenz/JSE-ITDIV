@@ -36,7 +36,7 @@ namespace JSE.Models.Results
         public string? actual_receiver_name { get; set; }
 
         public Guid? courier_id { get; set; }
-        public Courier? Courier { get; set; }
+        public GetCourierResult Courier { get; set; }
         public DateTime? arrival_date { get; set; }
 
         public bool? returned_status { get; set; }
@@ -46,11 +46,11 @@ namespace JSE.Models.Results
         // Pool definitions
         public string pool_sender_city { get; set; }
 
-        public PoolBranch SenderPool { get; set; }
+        public GetPoolResult SenderPool { get; set; }
 
         public string pool_receiver_city { get; set; }
 
-        public PoolBranch ReceiverPool { get; set; }
+        public GetPoolResult ReceiverPool { get; set; }
 
         // messages
         public ICollection<GetMessageResult> Messages { get; set; }

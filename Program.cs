@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using JSE;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +49,7 @@ builder.Services.AddControllers()
                 options.JsonSerializerOptions.ReferenceHandler = null;
 
             });
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<AppDbContext>(
     options =>
     {

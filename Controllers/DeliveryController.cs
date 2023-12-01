@@ -40,9 +40,9 @@ namespace JSE.Controllers
                     .Include(d => d.Messages)
                     .Include(d => d.Courier)
                     .Where(d => d.pool_sender_city ==  adminPoolCity || d.pool_receiver_city == adminPoolCity)
+                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
                     .ToListAsync();
-                List<GetDeliveryResult> processedDeliveryList = _mapper.Map<List<Delivery>, List<GetDeliveryResult>>(deliveries);
-                return Ok(processedDeliveryList);
+                return Ok(deliveries);
             }
             catch (Exception ex)
             {
@@ -125,12 +125,13 @@ namespace JSE.Controllers
                     .Include(d => d.Messages)
                     .Include(d => d.Courier)
                     .Where(d => d.tracking_number == tracking_number)
+                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
-                GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
+                //GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
 
                 //var result = deliveries.ReceiverPool.pool_phone
-                return Ok( new { processedDeliveryObject } );
+                return Ok(deliveries);
 
             }
             catch (Exception ex)
@@ -286,7 +287,7 @@ namespace JSE.Controllers
             }
         }
         
-        [HttpPatch("/successDelivery")] // COURIER PENCET
+        [HttpPatch("/successDelivery"), Authorize] // COURIER PENCET
         public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
         {
             try

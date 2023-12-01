@@ -7,6 +7,8 @@ using JSE.Models.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Text.Json.Nodes;
 
 namespace JSE.Controllers
 {
@@ -25,36 +27,29 @@ namespace JSE.Controllers
 
 
         //[HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
-        [HttpGet("get-by-admin-id")] 
-        public async Task<IActionResult> GetDeliveries([FromBody] Guid admin_id)
+        [HttpGet("admin_pool"), Authorize] 
+        public async Task<IActionResult> GetDeliveries()
         {
             try
             {
-                var adminObject = await _context.Admin.FindAsync(admin_id);
-                var deliveries = await _context.Delivery.Where(c => c.pool_sender_city == adminObject.pool_city && c.pool_receiver_city == adminObject.pool_city).ToListAsync();
-                return new ObjectResult(deliveries)
-                {
-                    StatusCode = 200
-                };
+                // get admin pool_city
+                var adminPoolCity = User.FindFirstValue("pool_city").ToString();
+                var deliveries = await _context.Delivery
+                    .Include(d => d.SenderPool)
+                    .Include(d => d.ReceiverPool)
+                    .Include(d => d.Messages)
+                    .Include(d => d.Courier)
+                    .Where(d => d.pool_sender_city ==  adminPoolCity || d.pool_receiver_city == adminPoolCity)
+                    .ToListAsync();
+                List<GetDeliveryResult> processedDeliveryList = _mapper.Map<List<Delivery>, List<GetDeliveryResult>>(deliveries);
+                return Ok(processedDeliveryList);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex);
             }
         }
-        [HttpGet("current_delivery")]
-        public async Task<IActionResult> GetCurrentDeliveryCourier(Guid courier_id)
-        {
-            try
-            {
-                var current_delivery = await _context.Delivery.Where(c => c.courier_id == courier_id && c.delivery_status == "on_destination_pool").FirstAsync();
-                return Ok(current_delivery);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(404, ex);
-            }
-        }
+        
         [HttpGet("/delivery")]
         public async Task<IActionResult> GetAllDeliveries()
         {
@@ -118,6 +113,7 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
+
         [HttpGet("/delivery/{tracking_number}")]
         public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
         {
@@ -127,12 +123,14 @@ namespace JSE.Controllers
                     .Include(d => d.SenderPool)
                     .Include(d => d.ReceiverPool)
                     .Include(d => d.Messages)
-                    .Where(d=> d.tracking_number == tracking_number).FirstAsync();
+                    .Include(d => d.Courier)
+                    .Where(d => d.tracking_number == tracking_number)
+                    .FirstOrDefaultAsync();
                 GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
 
                 //var result = deliveries.ReceiverPool.pool_phone
-                return Ok(processedDeliveryObject);
+                return Ok( new { processedDeliveryObject } );
 
             }
             catch (Exception ex)
@@ -141,31 +139,7 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpGet("/delivery/pool_city/{pool_name}")]
-        public async Task<IActionResult> GetByPoolCity(String pool_name) //FromBody itu json
-        {
-            try
-            {
-                var checkPool = await _context.PoolBranch.FindAsync(pool_name);
-                if (checkPool == null) return BadRequest("Invalid pool!");
-                var deliveries = await _context.Delivery
-                    .Include(d => d.SenderPool)
-                    .Include(d => d.ReceiverPool)
-                    .Include(d => d.Messages)
-                    .Where(d => d.pool_receiver_city == pool_name || d.pool_sender_city == pool_name).ToListAsync();
-                List<GetDeliveryResult> processedDeliveryList = _mapper.Map<List<Delivery>, List<GetDeliveryResult>>(deliveries);
-
-                return Ok(processedDeliveryList);
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex);
-            }
-        }
-
-
-        [HttpPatch("/dispatch")]
+        [HttpPatch("/dispatch")] //admin
         public async Task<IActionResult> NewDispatchToDestPool(String tracking_number)
         {
             try
@@ -196,7 +170,7 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [HttpPatch("/arrived")]
+        [HttpPatch("/arrived")] //admin
         public async Task<IActionResult> NewArrivalAtDestPool(String tracking_number)
         {
             try
@@ -263,7 +237,7 @@ namespace JSE.Controllers
         //        return StatusCode(500, ex);
         //    }
         //}
-        [HttpPost("/assignDeliveries")]
+        [HttpPost("/assignDeliveries")] //admin pencetd
         public async Task<IActionResult> AssignDeliveriesToCourier()
         {
             try
@@ -275,23 +249,31 @@ namespace JSE.Controllers
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
+                //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
                 //return Ok(availableCouriers);
                 for (int i = 0; i < availableCouriers.Count; i++)
                 {
-                    if (combinedPrioritizedDeliveries.Count == i)
-                    {
-                        break;
-                    }
-
+                    // if deliveries is smaller than number of couriers end loop;
+                    if (combinedPrioritizedDeliveries.Count == i) break;
+                    // if deliveries is more than number of couriers, continue.
                     try
                     {
-                        combinedPrioritizedDeliveries[i].courier_id = availableCouriers[i].courier_id;
-                        combinedPrioritizedDeliveries[i].delivery_status = "otw_receiver_address";
+                        var delivery = combinedPrioritizedDeliveries[i];
+                        var courier = availableCouriers[i];
+                        delivery.courier_id = availableCouriers[i].courier_id;
+                        delivery.delivery_status = "otw_receiver_address";
                         availableCouriers[i].courier_availability = false;
+                        var message = new Message()
+                        {
+                            tracking_number = delivery.tracking_number,
+                            message_text = $"Package is with courier {courier.courier_username} and is on the way to {delivery.receiver_address}",
+                            timestamp = DateTime.Now,
+                        };
+                        await _context.Message.AddAsync(message);
                     }
-                    catch (IndexOutOfRangeException ex)
+                    catch (Exception exc)
                     {
-                        break;
+                        continue;
                     }
                 }
                 await _context.SaveChangesAsync();
@@ -338,6 +320,8 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+        //courrier
         [HttpPatch("/failedDelivery")]
         public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {
@@ -369,44 +353,6 @@ namespace JSE.Controllers
                 return StatusCode(500, ex);
             }
         }
-
-        //[HttpPatch("/update")]
-        //public async Task <IActionResult> UpdatePackageStatus ([FromBody] string tracking_number, string package_status)
-        //{
-        //    var message = new Message();
-        //    switch (package_status)
-        //    {
-        //        case "on_sender_pool":
-
-                    
-        //    }
-        //    try
-        //    {
-        //        var delivery = await _context.Delivery.FindAsync(tracking_number);
-        //        if (delivery.delivery_status == "on_sender_pool")
-        //        {
-        //            delivery.delivery_status = "dispatched";
-        //            var newMessage = new Message()
-        //            {
-        //                message_text = $"Package is on the way to {delivery.pool_receiver_city} pool.",
-        //                tracking_number = tracking_number,
-        //                timestamp = DateTime.Now,
-        //            };
-
-        //            GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
-        //            await _context.Message.AddAsync(newMessage);
-        //            await _context.SaveChangesAsync();
-        //            return Ok(result);
-        //        }
-        //        else
-        //        {
-        //            return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex);
-        //    }
         
     }
 }

@@ -14,7 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper.QueryableExtensions;
-
+using System.Security.Cryptography;
 
 namespace JSE.Controllers
 {
@@ -37,10 +37,15 @@ namespace JSE.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAllCouriers()
         {
-            var couriers = await _context.Courier.ToListAsync();
+            var couriers = await _context.Courier.ProjectTo<GetCourierResult>(_mapper.ConfigurationProvider).ToListAsync();
             return Ok(couriers);
         }
-
+        [HttpGet("profile"), Authorize]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var courierData = User?.Identity?.Name;
+            return Ok(new { courierData });
+        }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
@@ -74,14 +79,14 @@ namespace JSE.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] CourierLoginRequest login)
         {
-            var CheckUser = await _context.Courier.Where(c => c.courier_username == login.courier_username).ToListAsync();
-            if (CheckUser.Count > 0)
+            var CheckUser = await _context.Courier.Where(c => c.courier_username == login.courier_username).FirstOrDefaultAsync();
+            if (CheckUser != null)
             {
-                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.courier_password, CheckUser[0].courier_password);
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.courier_password, CheckUser.courier_password);
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.courier_username, CheckUser[0].courier_id);
+                    var token = CreateToken(login.courier_username, CheckUser.courier_id);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData)
                     {
@@ -109,8 +114,8 @@ namespace JSE.Controllers
         private string CreateToken(String username, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("courier_username", username.ToString()),
-                new Claim("courier_id", UserId.ToString()),
+                new Claim(ClaimTypes.Name, username.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
                 new Claim(ClaimTypes.Role, "Courier"),
             };
 
@@ -132,11 +137,12 @@ namespace JSE.Controllers
         }
 
         //[HttpGet(""), Authorize(Roles = "Courier")]
-        [HttpGet("history")]
-        public async Task<IActionResult> GetDeliveryListCourier(Guid courier_id)
+        [HttpGet("history"), Authorize]
+        public async Task<IActionResult> GetDeliveryListCourier()
         {
             try
             {
+                var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id).ToListAsync();
                 List<GetDeliveryListCourier> ProcessedList = _mapper.Map<List<Delivery>, List<GetDeliveryListCourier>>(DeliveryList);
                 return new ObjectResult(ProcessedList)
@@ -146,6 +152,29 @@ namespace JSE.Controllers
             } catch (Exception ex)
             {
                 return StatusCode(500, ex);
+            }
+        }
+        [HttpGet("current_delivery"), Authorize]
+        public async Task<IActionResult> GetCurrentDeliveryCourier()
+        {
+            try
+            {
+                var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
+                var deliveries = await _context.Delivery
+                    .Include(d => d.SenderPool)
+                    .Include(d => d.ReceiverPool)
+                    .Include(d => d.Messages)
+                    .Where(d => d.courier_id == courier_id).FirstOrDefaultAsync();
+                if (deliveries == null) return NotFound(new { message = "No delivery!" });
+                GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
+
+
+                //var result = deliveries.ReceiverPool.pool_phone
+                return Ok(processedDeliveryObject);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(404, ex);
             }
         }
 

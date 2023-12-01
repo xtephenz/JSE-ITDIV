@@ -65,14 +65,14 @@ namespace JSE.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
         {
-            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).ToListAsync();
-            if (CheckUser.Count > 0)
+            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).FirstOrDefaultAsync();
+            if (CheckUser != null)
             {
-                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser[0].admin_password);
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser.admin_password);
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.admin_username, CheckUser[0].admin_id);
+                    var token = CreateToken(login.admin_username, CheckUser.admin_id, CheckUser.pool_city);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData) {
                         StatusCode = 200,
@@ -98,11 +98,12 @@ namespace JSE.Controllers
         }
 
 
-        private string CreateToken(String Username, Guid UserId)
+        private string CreateToken(String Username, Guid UserId, String pool_city)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim("admin_username", Username.ToString()),
-                new Claim("admin_id", UserId.ToString()),
+                new Claim(ClaimTypes.Name, Username.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
+                new Claim("pool_city", pool_city.ToString()),
                 new Claim(ClaimTypes.Role, "Admin"),
             };
 

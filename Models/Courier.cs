@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace JSE.Models
@@ -21,8 +22,9 @@ namespace JSE.Models
         public string courier_password { get; set; }
 
         public bool courier_availability { get; set; } = true;
+        [JsonIgnore]
 
-        public List<Delivery> Deliveries { get; set; } = new List<Delivery>();
+        public List<Delivery> Deliveries { get; set; }
     }
 }
 

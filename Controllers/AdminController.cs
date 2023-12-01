@@ -28,6 +28,18 @@ namespace JSE.Controllers
             _configuration = configuration;
             _context = context;
         }
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST
+        ///     {
+        ///         "admin_username": "meerkat",
+        ///         "pool_city": "JAKARTA",
+        ///         "admin_password": "Bl@ck$",
+        ///         "admin_confirm_password": "Bl@ck$"
+        ///     }
+        /// </remarks>
+        /// <param name="register"></param>
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] AdminRegisterRequest register)
         {
@@ -61,9 +73,18 @@ namespace JSE.Controllers
             }
 
         }
-        
 
-        
+
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST
+        ///     {
+        ///         "admin_username": "meerkat",
+        ///         "admin_password": "Bl@ck$",
+        ///     }
+        /// </remarks>
+        /// <param name="login"></param>
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
         {

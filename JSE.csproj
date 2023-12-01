@@ -36,4 +36,7 @@
     <None Remove="Models\Requests\" />
     <None Remove="Models\Results\" />
   </ItemGroup>
+  <PropertyGroup>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 </Project>

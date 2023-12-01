@@ -67,8 +67,28 @@ namespace JSE.Controllers
                 return StatusCode(404, ex);
             }
         }
-
-        [HttpPost("/delivery")]
+        ///<remarks>
+        ///Sample request:
+        ///
+        ///     POST
+        ///     {
+        ///         "sending_date": "2023-12-01T14:14:33.673Z",
+        ///         "sender_name": "sender satu",
+        ///         "sender_phone": "11111",
+        ///         "sender_address": "binus 111",
+        ///         "intended_receiver_name": "receiver satu",
+        ///         "receiver_phone": "22222",
+        ///         "receiver_address": "anggrek 111",
+        ///         "service_type": "reg",
+        ///         "package_weight": 1,
+        ///         "delivery_price": 10000,
+        ///         "pool_sender_city": "jakarta",
+        ///         "pool_receiver_city": "tangerang"
+        ///     }
+        ///</remarks>
+        ///
+        /// <param name="login"></param>
+        [HttpPost("/create_delivery")]
         public async Task<IActionResult> PostDelivery([FromBody] CreateDelivery delivery)
         {
             try

@@ -83,8 +83,8 @@ namespace JSE.Controllers
         ///         "service_type": "reg",
         ///         "package_weight": 1,
         ///         "delivery_price": 10000,
-        ///         "pool_sender_city": "jakarta",
-        ///         "pool_receiver_city": "tangerang"
+        ///         "pool_sender_city": "Jakarta",
+        ///         "pool_receiver_city": "Tangerang"
         ///     }
         ///</remarks>
         ///
@@ -118,17 +118,21 @@ namespace JSE.Controllers
                     timestamp = DateTime.Now
                 };
                 Delivery processedDeliveryObject = _mapper.Map<CreateDelivery, Delivery>(delivery);
-
+                //Console.WriteLine(processedDeliveryObject);
                 processedDeliveryObject.tracking_number = trackingNumber;
                 processedDeliveryObject.delivery_status = "on_sender_pool";
 
+
                 var output = _mapper.Map<GetDeliveryResult>(processedDeliveryObject);
+
+                
 
                 await _context.Message.AddAsync(message);
                 await _context.Delivery.AddAsync(processedDeliveryObject);
                 await _context.SaveChangesAsync();
 
                 return Ok(output);
+
             }
             catch (Exception ex)
             {

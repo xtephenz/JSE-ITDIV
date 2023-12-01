@@ -81,7 +81,7 @@ namespace JSE.Controllers
         ///     POST
         ///     {
         ///         "admin_username": "meerkat",
-        ///         "admin_password": "Bl@ck$",
+        ///         "admin_password": "Bl@ck$"
         ///     }
         /// </remarks>
         /// <param name="login"></param>

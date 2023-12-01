@@ -7,9 +7,11 @@ namespace JSE.Models
     {
         [Key]
         public Guid id { get; set; }
+
         [ForeignKey("Delivery")]
         [Required]
         public string tracking_number { get; set; }
+
         public Delivery Delivery { get; set; }
 
         [Required]

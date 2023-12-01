@@ -33,6 +33,7 @@ namespace JSE
             CreateMap<Message, GetMessageResult>();
 
             //CreateProjection<Delivery, GetDeliveryResult>();
+
             CreateMap<Delivery, GetDeliveryListCourier>();
 
             CreateMap<CreateDelivery, Delivery>();

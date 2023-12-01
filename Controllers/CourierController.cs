@@ -15,6 +15,7 @@ using System.Security.Claims;
 using System.Text;
 using AutoMapper.QueryableExtensions;
 using System.Security.Cryptography;
+using System.Net;
 
 namespace JSE.Controllers
 {

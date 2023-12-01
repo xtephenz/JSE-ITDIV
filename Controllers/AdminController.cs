@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BCrypt;
+using Microsoft.Extensions.Hosting;
 
 namespace JSE.Controllers
 {
@@ -65,14 +66,14 @@ namespace JSE.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] AdminLoginRequest login)
         {
-            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).FirstOrDefaultAsync();
-            if (CheckUser != null)
+            var CheckUser = await _context.Admin.Where(c => c.admin_username == login.admin_username).ToListAsync();
+            if (CheckUser.Count > 0)
             {
-                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser.admin_password);
+                var PasswordCheck = BCrypt.Net.BCrypt.EnhancedVerify(login.admin_password, CheckUser[0].admin_password);
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.admin_username, CheckUser.admin_id, CheckUser.pool_city);
+                    var token = CreateToken(login.admin_username, CheckUser[0].admin_id);
                     var responseData = new { token = token };
                     return new ObjectResult(responseData) {
                         StatusCode = 200,
@@ -96,14 +97,43 @@ namespace JSE.Controllers
                 };
             }
         }
-        
 
-        private string CreateToken(String Username, Guid UserId, String pool_city)
+        [HttpPost("receiveImageFromCourier")]
+        public IActionResult ReceiveImageFromCourier(IFormFile image, string trackingNumber)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest("Invalid image file");
+
+            var delivery = _context.Delivery.Find(trackingNumber);
+
+            if (delivery == null)
+                return NotFound("Delivery not found");
+
+            var imagePath = SaveImage(image);
+
+            delivery.imagePath = imagePath;
+            _context.SaveChanges();
+
+            return Ok("Image received successfully");
+        }
+
+        private string SaveImage(IFormFile image)
+        {
+            var uniqueFileName = $"{Guid.NewGuid().ToString()}_{image.FileName}";
+            var filePath = Path.Combine("images", uniqueFileName); // Path.Combine untuk membangun path file
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                image.CopyTo(fileStream);
+            }
+
+            return uniqueFileName;
+        }
+        private string CreateToken(String Username, Guid UserId)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim(ClaimTypes.Name, Username.ToString()),
-                new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
-                new Claim("pool_city", pool_city.ToString()),
+                new Claim("admin_username", Username.ToString()),
+                new Claim("admin_id", UserId.ToString()),
                 new Claim(ClaimTypes.Role, "Admin"),
             };
 

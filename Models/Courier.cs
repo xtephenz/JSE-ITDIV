@@ -21,8 +21,14 @@ namespace JSE.Models
         [Required]
         public string courier_password { get; set; }
 
+
+        //[ForeignKey("PoolBranch")]
+        //public string pool_city {  get; set; }
+        //public PoolBranch PoolBranch { get; set; }  
+
         public bool courier_availability { get; set; } = true;
         [JsonIgnore]
+
 
         public List<Delivery> Deliveries { get; set; }
     }

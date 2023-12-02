@@ -12,6 +12,7 @@ namespace JSE.Models.Requests
 
         public string courier_confirm_password { get; set; } = string.Empty;
 
+        public string pool_city {  get; set; } = string.Empty;
         public string courier_phone { get; set; }
     }
 }

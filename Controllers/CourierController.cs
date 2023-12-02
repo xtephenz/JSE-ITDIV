@@ -73,6 +73,7 @@ namespace JSE.Controllers
                 {
                     courier_username = register.courier_username,
                     courier_password = register.courier_password,
+                    //pool_city = register.pool_city,
                     courier_phone = register.courier_phone,
                 };
                 _context.Courier.Add(newCourier);
@@ -186,7 +187,7 @@ namespace JSE.Controllers
                     .Include(d => d.SenderPool)
                     .Include(d => d.ReceiverPool)
                     .Include(d => d.Messages)
-                    .Where(d => d.courier_id == courier_id).FirstOrDefaultAsync();
+                    .Where(d => d.courier_id == courier_id && d.delivery_status == "on_destination_pool").FirstOrDefaultAsync();
                 if (deliveries == null) return NotFound(new { message = "No delivery!" });
                 GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
@@ -210,13 +211,15 @@ namespace JSE.Controllers
 
                 var courier_data = await _context.Courier.Where(c => c.courier_id == courier_id).FirstOrDefaultAsync();
 
+                if (courier_data.courier_availability == false) return BadRequest(new { message = "You have a ongoing delivery job! Finish the ongoing delivery and try again." });
+
                 // fetch all deliveries that are on pool.
                 var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
 
                 if (deliveriesOnPool.Count == 0) return NotFound(new { message = "There are no pending deliveries at the moment!" });
 
-                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
-                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO").Reverse();
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG").Reverse();
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});

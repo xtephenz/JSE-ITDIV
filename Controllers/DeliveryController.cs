@@ -42,6 +42,7 @@ namespace JSE.Controllers
                     .Include(d => d.Courier)
                     .Where(d => d.pool_sender_city ==  adminPoolCity || d.pool_receiver_city == adminPoolCity)
                     .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
+                    .Reverse()
                     .ToListAsync();
                 return Ok(deliveries);
             }
@@ -57,7 +58,7 @@ namespace JSE.Controllers
             try
             {
                 var deliveries = await _context.Delivery
-                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
+                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider).Reverse()
                     .ToListAsync();
                 //var result = deliveries.ReceiverPool.pool_phone
                 return Ok(deliveries);
@@ -271,8 +272,10 @@ namespace JSE.Controllers
             {
                 // fetch all deliveries that are on pool.
                 var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
-                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
-                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
+
+                // to ensure it doesnt only picks the latest one and leaves the earliest one to die, i reverse the array.
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO").Reverse();
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG").Reverse();
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
@@ -354,10 +357,11 @@ namespace JSE.Controllers
         {
             try
             {
-                var delivery = await _context.Delivery.FindAsync(tracking_number);
+                var delivery = await _context.Delivery.Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
                 if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "delivery_failed";
+                    delivery.fail_message = courier_message;
                     var newMessage = new Message()
                     {
                         message_text = $"Package is rejected. \"{courier_message}\"",
@@ -380,7 +384,42 @@ namespace JSE.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
-        
+
+        [HttpPatch("/returnedToPool")]
+
+        public async Task<IActionResult> ReturnedToPool(String tracking_number, String courier_message)
+        {
+            try
+            {
+                var delivery = await _context.Delivery.Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
+                if (delivery.delivery_status == "delivery_failed")
+                {
+                    delivery.delivery_status = "returned_to_pool";
+                    delivery.Courier.courier_availability = true;
+                    delivery.returned_status = true;
+                    var newMessage = new Message()
+                    {
+                        message_text = $"Package has been returned to {delivery.pool_receiver_city} pool.",
+                        tracking_number = tracking_number,
+                        timestamp = DateTime.Now,
+                    };
+
+                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                    await _context.Message.AddAsync(newMessage);
+                    await _context.SaveChangesAsync();
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message); ;
+            }
+        }
+
     }
 }
 

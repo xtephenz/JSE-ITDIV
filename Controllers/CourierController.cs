@@ -320,7 +320,49 @@ namespace JSE.Controllers
                 return StatusCode(404, ex);
             }
         }
-
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST
+        ///     {
+        ///       "tracking_number": "PRIO2023120300001",
+        ///       "sending_date": "0001-01-01T00:00:00",
+        ///       "sender_name": "sender dua",
+        ///       "sender_phone": "2222",
+        ///       "sender_address": "binus 222",
+        ///       "intended_receiver_name": "receiver dua",
+        ///       "receiver_phone": "33333",
+        ///       "receiver_address": "anggrek 222",
+        ///       "service_type": "PRIO",
+        ///       "package_weight": 1,
+        ///       "delivery_price": 10000,
+        ///       "delivery_status": "otw_receiver_address",
+        ///       "actual_receiver_name": null,
+        ///       "courier_id": "239dc888-ac67-4904-8625-08dbf367229e",
+        ///       "Courier": {
+        ///         "courier_id": "239dc888-ac67-4904-8625-08dbf367229e",
+        ///         "courier_username": "depok",
+        ///         "courier_phone": "11111",
+        ///         "pool_city": "depok",
+        ///         "courier_availability": false
+        ///       },
+        ///       "arrival_date": null,
+        ///       "returned_status": null,
+        ///       "fail_message": null,
+        ///       "pool_sender_city": "Jakarta",
+        ///       "SenderPool": null,
+        ///       "pool_receiver_city": "Depok",
+        ///       "ReceiverPool": null,
+        ///       "Messages": [
+        ///         {
+        ///           "tracking_number": "PRIO2023120300001",
+        ///           "message_text": "Package is with courier depok and is on the way to anggrek 222",
+        ///           "timestamp": "2023-12-03T01:48:26.5139+07:00"
+        ///         }
+        ///       ]
+        ///     }
+        /// </remarks>
+        /// <param name="request_delivery"></param>
         [HttpPost("request_delivery")]
         [Authorize(Roles = "Courier")]
         public async Task<IActionResult> RequestDelivery()

@@ -191,8 +191,11 @@ namespace JSE.Controllers
 
         //[HttpGet(""), Authorize(Roles = "Courier")]
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> main
         /// <remarks>
         /// Sample result:
         /// 
@@ -244,7 +247,10 @@ namespace JSE.Controllers
                 return StatusCode(500, ex.InnerException.Message);
             }
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
        
         /// <remarks>
         /// Sample result:

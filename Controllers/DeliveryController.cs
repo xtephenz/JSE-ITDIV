@@ -312,12 +312,15 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="arrived"></param>
-    [HttpPatch("/arrived")] //admin
+        [HttpPatch("/arrived"), Authorize] //admin
         public async Task<IActionResult> NewArrivalAtDestPool(String tracking_number)
         {
             try
             {
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
+                var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
+                if (admin_pool_city != delivery.pool_receiver_city) 
+                    return BadRequest($"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!");
                 if (delivery.delivery_status == "dispatched")
                 {
                     delivery.delivery_status = "on_destination_pool";
@@ -439,7 +442,7 @@ namespace JSE.Controllers
                 }
                 await _context.SaveChangesAsync();
 
-                return Ok(new { assignmentList });
+                return Ok(assignmentList);
             }
             catch (Exception ex)
             {
@@ -499,7 +502,10 @@ namespace JSE.Controllers
         {
             try
             {
+                var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
                 var delivery = await _context.Delivery.Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
+                if (admin_pool_city != delivery.pool_receiver_city)
+                    return BadRequest($"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!");
                 if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "delivery_failed";

@@ -153,7 +153,7 @@ namespace JSE.Controllers
                 Package Identifier (12345): This part is a unique identifier for the package, allowing for a larger range of possibilities.
                 */
                 DateTime sending_date = DateTime.Now;
-                string packageType = delivery.service_type.ToString();
+                string packageType = delivery.service_type.ToString().ToUpper();
                 int packagesToDate =  _context.Delivery.Where(d => d.sending_date == sending_date).Count() + 1;
                 string packageIdentifier = packagesToDate.ToString("D5");
                 string shipmentDate = sending_date.ToString("yyyyMMdd");

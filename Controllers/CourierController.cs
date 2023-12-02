@@ -183,7 +183,40 @@ namespace JSE.Controllers
             return jwt;
         }
 
+
         //[HttpGet(""), Authorize(Roles = "Courier")]
+
+        /// <remarks>
+        /// Sample result:
+        /// 
+        ///     GET
+        ///         [
+        ///           {
+        ///             "tracking_number": "PRIO01122300004",
+        ///             "delivery_status": "package_delivered",
+        ///             "actual_receiver_name": "satpam",
+        ///             "receiver_phone": "22222",
+        ///             "receiver_address": "anggrek 111",
+        ///             "courier_id": "8d4920ee-be9f-4c22-ceab-08dbf29e8e5a",
+        ///             "fail_message": null,
+        ///             "arrival_date": "2023-12-02T15:14:25.812689",
+        ///             "pool_receiver_city": "Tangerang"
+        ///           },
+        ///           {
+        ///             "tracking_number": "PRIO01122300005",
+        ///             "delivery_status": "otw_receiver_address",
+        ///             "actual_receiver_name": null,
+        ///             "receiver_phone": "33333",
+        ///             "receiver_address": "anggrek 333",
+        ///             "courier_id": "8d4920ee-be9f-4c22-ceab-08dbf29e8e5a",
+        ///             "fail_message": null,
+        ///             "arrival_date": "0001-01-01T00:00:00",
+        ///             "pool_receiver_city": "Bekasi"
+        ///           }
+        ///         ]
+        /// </remarks>
+        /// <params name="history"></params>
+
         [HttpGet("history"), Authorize]
         public async Task<IActionResult> GetDeliveryListCourier()
         {
@@ -201,6 +234,65 @@ namespace JSE.Controllers
                 return StatusCode(500, ex.InnerException.Message);
             }
         }
+       
+        /// <remarks>
+        /// Sample result:
+        /// 
+        ///     GET
+        ///         {
+        ///            "tracking_number": "PRIO01122300004",
+        ///            "sending_date": "2023-12-01T14:14:33.673",
+        ///            "sender_name": "sender dua",
+        ///            "sender_phone": "11111",
+        ///            "sender_address": "binus 111",
+        ///            "intended_receiver_name": "receiver satu",
+        ///            "receiver_phone": "22222",
+        ///            "receiver_address": "anggrek 111",
+        ///            "service_type": "PRIO",
+        ///            "package_weight": 1,
+        ///            "delivery_price": 10000,
+        ///            "delivery_status": "otw_receiver_address",
+        ///            "actual_receiver_name": null,
+        ///            "courier_id": "8d4920ee-be9f-4c22-ceab-08dbf29e8e5a",
+        ///            "Courier": null,
+        ///            "arrival_date": null,
+        ///            "returned_status": null,
+        ///            "fail_message": null,
+        ///            "pool_sender_city": "Jakarta",
+        ///            "SenderPool": {
+        ///                      "pool_name": "Jakarta",
+        ///                      "pool_phone": "11111"
+        ///                  },
+        ///            "pool_receiver_city": "Tangerang",
+        ///            "ReceiverPool": {
+        ///                      "pool_name": "Tangerang",
+        ///                      "pool_phone": "22222"
+        ///                  },
+        ///            "Messages": [
+        ///                     {
+        ///                         "tracking_number": "PRIO01122300004",
+        ///                         "message_text": "Package received at Jakarta pool.",
+        ///                         "timestamp": "2023-12-02T15:05:50.679964"
+        ///                     },
+        ///                     {
+        ///                         "tracking_number": "PRIO01122300004",
+        ///                         "message_text": "Package is on the way to Tangerang pool.",
+        ///                         "timestamp": "2023-12-02T15:06:19.079793"
+        ///                     },
+        ///                     {
+        ///                         "tracking_number": "PRIO01122300004",
+        ///                         "message_text": "Package has arrived at Tangerang pool.",
+        ///                         "timestamp": "2023-12-02T15:06:29.833395"
+        ///                     },
+        ///                     {
+        ///                         "tracking_number": "PRIO01122300004",
+        ///                         "message_text": "Package is with courier kyuri and is on the way to anggrek 111",
+        ///                         "timestamp": "2023-12-02T15:06:37.134299"
+        ///                     }
+        ///                  ]
+        ///         }
+        /// </remarks>
+        /// <param name="current_delivery"></param>
         [HttpGet("current_delivery"), Authorize]
         public async Task<IActionResult> GetCurrentDeliveryCourier()
         {

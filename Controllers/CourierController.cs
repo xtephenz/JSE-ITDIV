@@ -35,12 +35,36 @@ namespace JSE.Controllers
             _context = context;
             _mapper = mapper;
         }
+
+        /// <remarks>
+        /// Sample result:
+        /// 
+        ///     GET
+        ///     [
+        ///         {
+        ///             "courier_username": "kyuri",
+        ///             "courier_phone": "111111",
+        ///             "courier_availability": true
+        ///         }
+        ///     ]
+        /// </remarks>
+        /// <param name="all"></param>
         [HttpGet("all")]
         public async Task<IActionResult> GetAllCouriers()
         {
             var couriers = await _context.Courier.ProjectTo<GetCourierResult>(_mapper.ConfigurationProvider).ToListAsync();
             return Ok(couriers);
         }
+
+        /// <remarks>
+        /// Sample result:
+        /// 
+        ///     GET
+        ///         {
+        ///             "courier_username": "kyuri"
+        ///         }
+        /// </remarks>
+        /// <param name="profile"></param>
         [HttpGet("profile"), Authorize]
         public async Task<IActionResult> GetUserProfile()
         {
@@ -52,9 +76,9 @@ namespace JSE.Controllers
         /// 
         ///     POST
         ///     {
-        ///         "courier_username": "meerkat",
-        ///         "courier_password": "Bl@ck$",
-        ///         "courier_confirm_password": "Bl@ck$",
+        ///         "courier_username": "kyuri",
+        ///         "courier_password": "Wra@ck$",
+        ///         "courier_confirm_password": "Wra@ck$",
         ///         "courier_phone": "111111"
         ///     }
         /// </remarks>
@@ -94,8 +118,8 @@ namespace JSE.Controllers
         /// 
         ///     POST
         ///     {
-        ///         "courier_username": "meerkat",
-        ///         "courier_password": "Bl@ck$"
+        ///         "courier_username": "kyuri",
+        ///         "courier_password": "Wra@ck$"
         ///     }
         /// </remarks>
         /// <param name="login"></param>

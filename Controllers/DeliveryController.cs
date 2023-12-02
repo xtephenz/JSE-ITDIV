@@ -28,6 +28,52 @@ namespace JSE.Controllers
 
 
         //[HttpGet("/daftar-pesanan"), Authorize(Roles = "Admin")]
+
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET
+        ///     {
+        ///         "tracking_number": "reg01122300001",
+        ///         "sending_date": "2023-12-01T14:14:33.673",
+        ///         "sender_name": "sender satu",
+        ///         "sender_phone": "11111",
+        ///         "sender_address": "binus 111",
+        ///         "intended_receiver_name": "receiver satu",
+        ///         "receiver_phone": "22222",
+        ///         "receiver_address": "anggrek 111",
+        ///         "service_type": "reg",
+        ///         "package_weight": 1,
+        ///         "delivery_price": 10000,
+        ///         "delivery_status": "on_sender_pool",
+        ///         "actual_receiver_name": null,
+        ///         "courier_id": null,
+        ///         "Courier": null,
+        ///         "arrival_date": null,
+        ///         "returned_status": null,
+        ///         "fail_message": null,
+        ///         "pool_sender_city": "jakarta",
+        ///         "SenderPool":
+        ///             {
+        ///                 "pool_name": "Jakarta",
+        ///                 "pool_phone": "11111"
+        ///             },
+        ///         "pool_receiver_city": "tangerang",
+        ///         "ReceiverPool":
+        ///             {
+        ///                 "pool_name": "Tangerang",
+        ///                 "pool_phone": "22222"
+        ///             },
+        ///         "Messages": [
+        ///             {
+        ///                 "tracking_number": "reg01122300001",
+        ///                 "message_text": "Package received at jakarta pool.",
+        ///                 "timestamp": "2023-12-02T00:37:59.737891"
+        ///             }
+        ///         ]
+        ///     }
+        /// </remarks>
+        /// <param name="admin_pool"></param>
         [HttpGet("admin_pool"), Authorize] 
         public async Task<IActionResult> GetDeliveries()
         {
@@ -74,7 +120,6 @@ namespace JSE.Controllers
         ///
         ///     POST
         ///     {
-        ///         "sending_date": "2023-12-01T14:14:33.673Z",
         ///         "sender_name": "sender satu",
         ///         "sender_phone": "11111",
         ///         "sender_address": "binus 111",
@@ -140,8 +185,53 @@ namespace JSE.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);
             }
         }
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET
+        ///     {
+        ///         "tracking_number": "reg01122300001",
+        ///         "sending_date": "2023-12-01T14:14:33.673",
+        ///         "sender_name": "sender satu",
+        ///         "sender_phone": "11111",
+        ///         "sender_address": "binus 111",
+        ///         "intended_receiver_name": "receiver satu",
+        ///         "receiver_phone": "22222",
+        ///         "receiver_address": "anggrek 111",
+        ///         "service_type": "PRIO", ->param: "REG" atau "PRIO"
+        ///         "package_weight": 1,
+        ///         "delivery_price": 10000,
+        ///         "delivery_status": "on_sender_pool",
+        ///         "actual_receiver_name": null,
+        ///         "courier_id": null,
+        ///         "Courier": null,
+        ///         "arrival_date": null,
+        ///         "returned_status": null,
+        ///         "fail_message": null,
+        ///         "pool_sender_city": "jakarta",
+        ///         "SenderPool":
+        ///             {
+        ///               "pool_name": "Jakarta",
+        ///               "pool_phone": "11111"
+        ///             },
+        ///         "pool_receiver_city": "tangerang",
+        ///         "ReceiverPool":
+        ///             {
+        ///               "pool_name": "Tangerang",
+        ///               "pool_phone": "22222"
+        ///             },
+        ///         "Messages": [
+        ///             {
+        ///               "tracking_number": "reg01122300001",
+        ///               "message_text": "Package received at jakarta pool.",
+        ///               "timestamp": "2023-12-02T00:37:59.737891"
+        ///             }
+        ///         ]
+        ///     }
+        /// </remarks>
+        /// <param name="tracking_number"></param>
 
-        [HttpGet("/delivery/{tracking_number}")]
+[HttpGet("/delivery/{tracking_number}")]
         public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
         {
             try
@@ -167,7 +257,18 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPatch("/dispatch")] //admin
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH
+        ///     {
+        ///         "tracking_number": "PRIO01122300004",
+        ///         "message_text": "Package is on the way to Tangerang pool.",
+        ///         "timestamp": "2023-12-02T15:06:19.079793+07:00"
+        ///     }
+        /// </remarks>
+        /// <param name="dispatch"></param>
+    [HttpPatch("/dispatch")] //admin
         public async Task<IActionResult> NewDispatchToDestPool(String tracking_number)
         {
             try
@@ -198,7 +299,18 @@ namespace JSE.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
             }
         }
-        [HttpPatch("/arrived")] //admin
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PATCH
+        ///     {
+        ///       "tracking_number": "PRIO01122300004",
+        ///       "message_text": "Package has arrived at Tangerang pool.",
+        ///       "timestamp": "2023-12-02T15:06:29.833395+07:00"
+        ///     }
+        /// </remarks>
+        /// <param name="arrived"></param>
+    [HttpPatch("/arrived")] //admin
         public async Task<IActionResult> NewArrivalAtDestPool(String tracking_number)
         {
             try
@@ -265,7 +377,14 @@ namespace JSE.Controllers
         //        return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
         //    }
         //}
-        [HttpPost("/assignDeliveries")] //admin pencetd
+
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     Deliveries assigned to courier!
+        /// </remarks>
+        /// <param name="arrived"></param>
+        [HttpPost("/assignDeliveries")] //admin pencet
         public async Task<IActionResult> AssignDeliveriesToCourier()
         {
             try
@@ -315,43 +434,54 @@ namespace JSE.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);
             }
         }
-        
+
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PATCH
+        ///     {
+        ///       "tracking_number": "PRIO01122300004",
+        ///       "message_text": "Package is received by satpam.",
+        ///       "timestamp": "2023-12-02T15:14:25.812764+07:00"
+        ///     }
+        /// </remarks>
+        /// <param name="arrived"></param>
         [HttpPatch("/successDelivery"), Authorize] // COURIER PENCET
-        public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
-        {
-            try
+            public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
             {
-                var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == tracking_number).FirstAsync();
-                if (delivery.delivery_status == "otw_receiver_address")
+                try
                 {
-                    delivery.delivery_status = "package_delivered";
-                    delivery.actual_receiver_name = receiver_name;
-                    delivery.Courier.courier_availability = true;
-                    delivery.arrival_date = DateTime.Now;
-                    var newMessage = new Message()
+                    var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == tracking_number).FirstAsync();
+                    if (delivery.delivery_status == "otw_receiver_address")
                     {
-                        message_text = $"Package is received by {receiver_name}.",
-                        tracking_number = tracking_number,
-                        timestamp = DateTime.Now,
-                    };
+                        delivery.delivery_status = "package_delivered";
+                        delivery.actual_receiver_name = receiver_name;
+                        delivery.Courier.courier_availability = true;
+                        delivery.arrival_date = DateTime.Now;
+                        var newMessage = new Message()
+                        {
+                            message_text = $"Package is received by {receiver_name}.",
+                            tracking_number = tracking_number,
+                            timestamp = DateTime.Now,
+                        };
 
-                    GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
-                    await _context.Message.AddAsync(newMessage);
-                    await _context.SaveChangesAsync();
-                    return Ok(result);
+                        GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                        await _context.Message.AddAsync(newMessage);
+                        await _context.SaveChangesAsync();
+                        return Ok(result);
+                    }
+                    else
+                    {
+                        return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
                 }
             }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.InnerException.Message);;
-            }
-        }
 
-        //courrier
+        //courier
         [HttpPatch("/failedDelivery")]
         public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {
@@ -427,3 +557,4 @@ namespace JSE.Controllers
 
 
 
+    

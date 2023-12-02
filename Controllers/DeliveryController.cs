@@ -34,7 +34,7 @@ namespace JSE.Controllers
         /// 
         ///     GET
         ///     {
-        ///         "tracking_number": "reg01122300001",
+        ///         "tracking_number": "REG01122300001",
         ///         "sending_date": "2023-12-01T14:14:33.673",
         ///         "sender_name": "sender satu",
         ///         "sender_phone": "11111",
@@ -58,7 +58,7 @@ namespace JSE.Controllers
         ///                 "pool_name": "Jakarta",
         ///                 "pool_phone": "11111"
         ///             },
-        ///         "pool_receiver_city": "tangerang",
+        ///         "pool_receiver_city": "Tangerang",
         ///         "ReceiverPool":
         ///             {
         ///                 "pool_name": "Tangerang",
@@ -66,8 +66,8 @@ namespace JSE.Controllers
         ///             },
         ///         "Messages": [
         ///             {
-        ///                 "tracking_number": "reg01122300001",
-        ///                 "message_text": "Package received at jakarta pool.",
+        ///                 "tracking_number": "REG01122300001",
+        ///                 "message_text": "Package received at Jakarta pool.",
         ///                 "timestamp": "2023-12-02T00:37:59.737891"
         ///             }
         ///         ]

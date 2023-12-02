@@ -120,24 +120,24 @@ namespace JSE.Controllers
             }
         }
 
-        //[HttpPost("receiveImageFromCourier")]
-        //public IActionResult ReceiveImageFromCourier(IFormFile image, string trackingNumber)
-        //{
-        //    if (image == null || image.Length == 0)
-        //        return BadRequest("Invalid image file");
+        [HttpPost("receiveImageFromCourier")]
+        public async Task<IActionResult> ReceiveImageFromCourier(IFormFile image, string trackingNumber)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest("Invalid image file");
 
-        //    var delivery = _context.Delivery.Find(trackingNumber);
+            var delivery = _context.Delivery.Find(trackingNumber);
 
-        //    if (delivery == null)
-        //        return NotFound("Delivery not found");
+            if (delivery == null)
+                return NotFound("Delivery not found");
 
-        //    var imagePath = SaveImage(image);
+            var imagePath = SaveImage(image);
 
-        //    delivery.imagePath = imagePath;
-        //    _context.SaveChanges();
+            delivery.image_path = imagePath;
+            await _context.SaveChangesAsync();
 
-        //    return Ok("Image received successfully");
-        //}
+            return Ok("Image received successfully");
+        }
 
         private string SaveImage(IFormFile image)
         {
@@ -167,7 +167,6 @@ namespace JSE.Controllers
 
             var token = new JwtSecurityToken(
                     claims: claims,
-
                     expires: DateTime.Now.AddHours(6),
                     signingCredentials: creds
                 );

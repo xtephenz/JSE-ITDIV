@@ -70,8 +70,7 @@ namespace JSE.Models
 
         public DateTime? arrival_date { get; set; }
 
-        //public byte? bukti_gambar { get; set; }
-        //public string imagePath { get; set; }
+        public string? image_path { get; set; }
         public bool? returned_status { get; set; }
 
         [MaxLength(255)]

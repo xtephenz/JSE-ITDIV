@@ -86,6 +86,10 @@ namespace JSE.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] CourierRegisterRequest register)
         {
+            var CheckPoolCity = await _context.PoolBranch.Where(c => c.pool_name == register.pool_city).ToListAsync();
+            if (register.pool_city == "" || CheckPoolCity.Count == 0)
+                return new ObjectResult(new { message = "Invalid pool city!" });
+
             if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
             { StatusCode = 400 };
 
@@ -97,7 +101,7 @@ namespace JSE.Controllers
                 {
                     courier_username = register.courier_username,
                     courier_password = register.courier_password,
-                    //pool_city = register.pool_city,
+                    pool_city = register.pool_city,
                     courier_phone = register.courier_phone,
                 };
                 _context.Courier.Add(newCourier);
@@ -184,13 +188,16 @@ namespace JSE.Controllers
         }
 
         //[HttpGet(""), Authorize(Roles = "Courier")]
-        [HttpGet("history"), Authorize]
+        [HttpGet("history")]
+        [Authorize(Roles = "Courier")]
         public async Task<IActionResult> GetDeliveryListCourier()
         {
             try
             {
+                var accepted_statuses = new List<String> { "package_delivered", "delivery_failed", "returned_to_pool" };
                 var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id).ToListAsync();
+                var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id && accepted_statuses.Contains(c.delivery_status)).ToListAsync();
+                DeliveryList.Reverse();
                 List<GetDeliveryListCourier> ProcessedList = _mapper.Map<List<Delivery>, List<GetDeliveryListCourier>>(DeliveryList);
                 return new ObjectResult(ProcessedList)
                 {
@@ -201,17 +208,20 @@ namespace JSE.Controllers
                 return StatusCode(500, ex.InnerException.Message);
             }
         }
-        [HttpGet("current_delivery"), Authorize]
+        [HttpGet("current_delivery")]
+        [Authorize(Roles = "Courier")]
+
         public async Task<IActionResult> GetCurrentDeliveryCourier()
         {
             try
             {
+                List<String> accepted_statuses = new List<String> { "on_destination_pool", "otw_receover_address", "package_delivered", "delivery_failed" };
                 var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var deliveries = await _context.Delivery
                     .Include(d => d.SenderPool)
                     .Include(d => d.ReceiverPool)
                     .Include(d => d.Messages)
-                    .Where(d => d.courier_id == courier_id && d.delivery_status == "on_destination_pool").FirstOrDefaultAsync();
+                    .Where(d => d.courier_id == courier_id && accepted_statuses.Contains(d.delivery_status)).FirstOrDefaultAsync();
                 if (deliveries == null) return NotFound(new { message = "No delivery!" });
                 GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
 
@@ -225,25 +235,27 @@ namespace JSE.Controllers
             }
         }
 
-        [HttpPost("request_delivery"), Authorize]
+        [HttpPost("request_delivery")]
+        [Authorize(Roles = "Courier")]
         public async Task<IActionResult> RequestDelivery()
         {
             try
             {
                 var courier_id = new Guid(User?.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var courier_username = User?.Identity?.Name;
+                var courier_pool_city = User?.FindFirstValue("pool_city").ToString();
 
                 var courier_data = await _context.Courier.Where(c => c.courier_id == courier_id).FirstOrDefaultAsync();
 
                 if (courier_data.courier_availability == false) return BadRequest(new { message = "You have a ongoing delivery job! Finish the ongoing delivery and try again." });
 
                 // fetch all deliveries that are on pool.
-                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
+                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool" && d.pool_receiver_city == courier_pool_city).ToListAsync();
 
                 if (deliveriesOnPool.Count == 0) return NotFound(new { message = "There are no pending deliveries at the moment!" });
-
-                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO").Reverse();
-                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG").Reverse();
+                    
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});

@@ -88,8 +88,9 @@ namespace JSE.Controllers
                     .Include(d => d.Courier)
                     .Where(d => d.pool_sender_city ==  adminPoolCity || d.pool_receiver_city == adminPoolCity)
                     .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
-                    .Reverse()
                     .ToListAsync();
+
+                deliveries.Reverse();
                 return Ok(deliveries);
             }
             catch (Exception ex)
@@ -104,9 +105,10 @@ namespace JSE.Controllers
             try
             {
                 var deliveries = await _context.Delivery
-                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider).Reverse()
+                    .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
                     .ToListAsync();
                 //var result = deliveries.ReceiverPool.pool_phone
+                deliveries.Reverse();
                 return Ok(deliveries);
 
             }
@@ -142,7 +144,7 @@ namespace JSE.Controllers
             {
                 // create tracking number:
                 /*
-                Tracking Number Format: XYZ-DDMMYY-12345
+                Tracking Number Format: XYZ-YYYYMMDD-12345
 
                 In this modified format:
 
@@ -150,10 +152,11 @@ namespace JSE.Controllers
                 Shipment Date (DDMMYY): This part encodes the date of shipment or order placement, using a date format like YYMMDD or MMDDYY.
                 Package Identifier (12345): This part is a unique identifier for the package, allowing for a larger range of possibilities.
                 */
+                DateTime sending_date = DateTime.Now;
                 string packageType = delivery.service_type.ToString();
-                int packagesToDate =  _context.Delivery.Where(d => d.sending_date == delivery.sending_date).Count() + 1;
+                int packagesToDate =  _context.Delivery.Where(d => d.sending_date == sending_date).Count() + 1;
                 string packageIdentifier = packagesToDate.ToString("D5");
-                string shipmentDate = delivery.sending_date.ToString("ddMMyy");
+                string shipmentDate = sending_date.ToString("yyyyMMdd");
                 string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";
 
 
@@ -231,7 +234,7 @@ namespace JSE.Controllers
         /// </remarks>
         /// <param name="tracking_number"></param>
 
-[HttpGet("/delivery/{tracking_number}")]
+        [HttpGet("/delivery/{tracking_number}")]
         public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
         {
             try
@@ -245,7 +248,6 @@ namespace JSE.Controllers
                     .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
                 //GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
-
 
                 //var result = deliveries.ReceiverPool.pool_phone
                 return Ok(deliveries);
@@ -268,7 +270,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="dispatch"></param>
-    [HttpPatch("/dispatch")] //admin
+        [HttpPatch("/dispatch")] //admin
         public async Task<IActionResult> NewDispatchToDestPool(String tracking_number)
         {
             try
@@ -384,20 +386,20 @@ namespace JSE.Controllers
         ///     Deliveries assigned to courier!
         /// </remarks>
         /// <param name="arrived"></param>
-        [HttpPost("/assignDeliveries")] //admin pencet
+        [HttpPost("/assignDeliveries"), Authorize] //admin pencet
         public async Task<IActionResult> AssignDeliveriesToCourier()
         {
             try
             {
                 // fetch all deliveries that are on pool.
-                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool").ToListAsync();
+                var adminPoolCity = User?.FindFirstValue("pool_city").ToString();
+                var deliveriesOnPool = await _context.Delivery.Where(d => d.delivery_status == "on_destination_pool" && d.pool_receiver_city == adminPoolCity).ToListAsync();
 
-                // to ensure it doesnt only picks the latest one and leaves the earliest one to die, i reverse the array.
-                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO").Reverse();
-                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG").Reverse();
+                var prioDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "PRIO");
+                var regDeliveries = deliveriesOnPool.Where(prio => prio.service_type == "REG");
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
-                var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true).ToListAsync();
+                var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true && d.pool_city == adminPoolCity).ToListAsync();
                 //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
                 //return Ok(availableCouriers);
                 for (int i = 0; i < availableCouriers.Count; i++)

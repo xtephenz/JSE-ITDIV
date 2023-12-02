@@ -5,7 +5,6 @@ namespace JSE.Models.Requests
 {
     public class CreateDelivery
     {
-        public DateTime sending_date { get; set; }
         public string sender_name { get; set; }
 
         public string sender_phone { get; set; }

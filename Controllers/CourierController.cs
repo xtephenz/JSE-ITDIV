@@ -89,10 +89,9 @@ namespace JSE.Controllers
         {
             var CheckPoolCity = await _context.PoolBranch.Where(c => c.pool_name == register.pool_city).ToListAsync();
             if (register.pool_city == "" || CheckPoolCity.Count == 0)
-                return new ObjectResult(new { message = "Invalid pool city!" });
+                return BadRequest(new { message = "Invalid pool city!" });
 
-            if (register.courier_password != register.courier_confirm_password) return new ObjectResult(new { message = "Password mismatch!" })
-            { StatusCode = 400 };
+            if (register.courier_password != register.courier_confirm_password) return BadRequest(new { message = "Password mismatch!" });
 
             var userExists = await _context.Courier.Where(c => c.courier_username == register.courier_username).ToListAsync();
             if (userExists.Count == 0)
@@ -111,10 +110,7 @@ namespace JSE.Controllers
             }
             else
             {
-                return new ObjectResult(new { message = "Username already exists!" })
-                {
-                    StatusCode = 400
-                };
+                return BadRequest(new { message = "Username already exists!" });
             }
 
         }
@@ -138,36 +134,28 @@ namespace JSE.Controllers
                 // var PasswordCheck = login.admin_password == CheckUser[0].admin_password;
                 if (PasswordCheck)
                 {
-                    var token = CreateToken(login.courier_username, CheckUser.courier_id);
+                    var token = CreateToken(login.courier_username, CheckUser.courier_id, CheckUser.pool_city);
                     var responseData = new { token = token };
-                    return new ObjectResult(responseData)
-                    {
-                        StatusCode = 200,
-                    };
+                    return Ok(responseData);
                 }
                 else
                 {
                     var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
-                    return new ObjectResult(responseData)
-                    {
-                        StatusCode = 401,
-                    };
+                    return StatusCode(401, responseData);
                 }
             }
             else
             {
                 var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
-                return new ObjectResult(responseData)
-                {
-                    StatusCode = 401,
-                };
+                return StatusCode(401, responseData);
             }
         }
-        private string CreateToken(String username, Guid UserId)
+        private string CreateToken(String username, Guid UserId, String pool_city)
         {
             List<Claim> claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, username.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
+                new Claim("pool_city", pool_city.ToString()),
                 new Claim(ClaimTypes.Role, "Courier"),
             };
 

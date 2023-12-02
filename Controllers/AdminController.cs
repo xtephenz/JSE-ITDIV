@@ -34,7 +34,7 @@ namespace JSE.Controllers
         ///     POST
         ///     {
         ///         "admin_username": "meerkat",
-        ///         "pool_city": "JAKARTA",
+        ///         "pool_city": "Jakarta",
         ///         "admin_password": "Bl@ck$",
         ///         "admin_confirm_password": "Bl@ck$"
         ///     }

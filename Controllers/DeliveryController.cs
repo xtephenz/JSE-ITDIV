@@ -507,7 +507,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="failedDelivery"></param>
-        [HttpPatch("/failedDelivery")]
+        [HttpPatch("/failedDelivery"), Authorize]
         public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {
             try
@@ -545,11 +545,11 @@ namespace JSE.Controllers
 
         [HttpPatch("/returnedToPool")]
 
-        public async Task<IActionResult> ReturnedToPool(String tracking_number, String courier_message)
+        public async Task<IActionResult> ReturnedToPool(String tracking_number)
         {
             try
             {
-                var delivery = await _context.Delivery.Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
+                var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
                 if (delivery.delivery_status == "delivery_failed")
                 {
                     delivery.delivery_status = "returned_to_pool";

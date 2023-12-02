@@ -61,15 +61,21 @@ namespace JSE.Controllers
         /// 
         ///     GET
         ///         {
-        ///             "courier_username": "kyuri"
+        ///             "courier_username": "kyuri",
+        ///             "courier_phone": "123123123132",
+        ///             "pool_city": "Depok",
+        ///             "courier_availability": false
         ///         }
         /// </remarks>
         /// <param name="profile"></param>
         [HttpGet("profile"), Authorize]
         public async Task<IActionResult> GetUserProfile()
         {
-            var courierData = User?.Identity?.Name; //? bisa ada value bisa tidak
-            return Ok(new { courierData });
+            var courier_id = new Guid(User?.FindFirstValue(ClaimTypes.NameIdentifier).ToString()); //? bisa ada value bisa tidak
+            var courier_data = await _context.Courier.Where(c => c.courier_id == courier_id).FirstOrDefaultAsync();
+
+            var courier_profile = _mapper.Map<GetCourierResult>(courier_data);
+            return Ok(courier_profile);
         }
         /// <remarks>
         /// Sample request:
@@ -231,7 +237,6 @@ namespace JSE.Controllers
                 return StatusCode(500, ex.InnerException.Message);
             }
         }
-
        
         /// <remarks>
         /// Sample result:
@@ -296,7 +301,7 @@ namespace JSE.Controllers
         {
             try
             {
-                List<String> accepted_statuses = new List<String> { "on_destination_pool", "otw_receover_address", "package_delivered", "delivery_failed" };
+                List<String> accepted_statuses = new List<String> { "on_destination_pool", "otw_receiver_address", "package_delivered", "delivery_failed" };
                 var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var deliveries = await _context.Delivery
                     .Include(d => d.SenderPool)

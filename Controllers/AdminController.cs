@@ -96,61 +96,23 @@ namespace JSE.Controllers
                 if (PasswordCheck)
                 {
                     var token = CreateToken(login.admin_username, CheckUser.admin_id, CheckUser.pool_city);
-                    var responseData = new { token = token };
-                    return new ObjectResult(responseData) {
-                        StatusCode = 200,
-                    };
+                    var responseData = new { token };
+                    return Ok(responseData);
                 }
                 else
                 {
                     var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
-                    return new ObjectResult(responseData)
-                    {
-                        StatusCode = 401,
-                    };
+                    return StatusCode(401, responseData);
                 }
             }
             else
             {
                 var responseData = new { message = "Login Unsuccessful, email or password invalid!" };
-                return new ObjectResult(responseData)
-                {
-                    StatusCode = 401,
-                };
+                return StatusCode(401, responseData);
             }
         }
 
-        [HttpPost("receiveImageFromCourier")]
-        public async Task<IActionResult> ReceiveImageFromCourier(IFormFile image, string trackingNumber)
-        {
-            if (image == null || image.Length == 0)
-                return BadRequest("Invalid image file");
-
-            var delivery = _context.Delivery.Find(trackingNumber);
-
-            if (delivery == null)
-                return NotFound("Delivery not found");
-
-            var imagePath = SaveImage(image);
-
-            delivery.image_path = imagePath;
-            await _context.SaveChangesAsync();
-
-            return Ok("Image received successfully");
-        }
-
-        private string SaveImage(IFormFile image)
-        {
-            var uniqueFileName = $"{Guid.NewGuid().ToString()}_{image.FileName}";
-            var filePath = Path.Combine("images", uniqueFileName); // Path.Combine untuk membangun path file
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                image.CopyTo(fileStream);
-            }
-
-            return uniqueFileName;
-        }
+        
         private string CreateToken(String Username, Guid UserId, String pool_city)
         {
             List<Claim> claims = new List<Claim> {

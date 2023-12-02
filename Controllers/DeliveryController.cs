@@ -400,6 +400,8 @@ namespace JSE.Controllers
                 var combinedPrioritizedDeliveries = prioDeliveries.Concat(regDeliveries).ToList();
 
                 var availableCouriers = await _context.Courier.Where(d => d.courier_availability == true && d.pool_city == adminPoolCity).ToListAsync();
+
+                List<Object> assignmentList = new List<Object> {};
                 //return Ok(new {combinedPrioritizedDeliveries,  availableCouriers});
                 //return Ok(availableCouriers);
                 for (int i = 0; i < availableCouriers.Count; i++)
@@ -421,6 +423,14 @@ namespace JSE.Controllers
                             timestamp = DateTime.Now,
                         };
                         await _context.Message.AddAsync(message);
+                        var assigned_data = new
+                        {
+                            tracking_number = delivery.tracking_number,
+                            courier_id = availableCouriers[i].courier_id,
+                            courier_name = availableCouriers[i].courier_username,
+                            pool_city = delivery.pool_receiver_city,
+                        };
+                        assignmentList.Add(assigned_data);
                     }
                     catch (Exception exc)
                     {
@@ -429,7 +439,7 @@ namespace JSE.Controllers
                 }
                 await _context.SaveChangesAsync();
 
-                return Ok("Deliveries assigned to courier!");
+                return Ok(new { assignmentList });
             }
             catch (Exception ex)
             {

@@ -42,7 +42,7 @@ namespace JSE.Controllers
         ///         "intended_receiver_name": "receiver satu",
         ///         "receiver_phone": "22222",
         ///         "receiver_address": "anggrek 111",
-        ///         "service_type": "reg",
+        ///         "service_type": "REG",
         ///         "package_weight": 1,
         ///         "delivery_price": 10000,
         ///         "delivery_status": "on_sender_pool",
@@ -52,7 +52,7 @@ namespace JSE.Controllers
         ///         "arrival_date": null,
         ///         "returned_status": null,
         ///         "fail_message": null,
-        ///         "pool_sender_city": "jakarta",
+        ///         "pool_sender_city": "Jakarta",
         ///         "SenderPool":
         ///             {
         ///                 "pool_name": "Jakarta",
@@ -128,7 +128,7 @@ namespace JSE.Controllers
         ///         "intended_receiver_name": "receiver satu",
         ///         "receiver_phone": "22222",
         ///         "receiver_address": "anggrek 111",
-        ///         "service_type": "reg",
+        ///         "service_type": "REG",
         ///         "package_weight": 1,
         ///         "delivery_price": 10000,
         ///         "pool_sender_city": "Jakarta",
@@ -496,7 +496,17 @@ namespace JSE.Controllers
                 }
             }
 
-        //courier
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PATCH
+        ///     {
+        ///       "tracking_number": "PRIO01122300004",
+        ///       "message_text": "Package is rejected. \"gagal uy\"",
+        ///       "timestamp": "2023-12-02T15:14:25.812764+07:00"
+        ///     }
+        /// </remarks>
+        /// <param name="failedDelivery"></param>
         [HttpPatch("/failedDelivery")]
         public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {

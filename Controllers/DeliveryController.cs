@@ -248,7 +248,10 @@ namespace JSE.Controllers
                     .ProjectTo<GetDeliveryResult>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync();
                 //GetDeliveryResult processedDeliveryObject = _mapper.Map<Delivery, GetDeliveryResult>(deliveries);
-
+                if (deliveries == null)
+                {
+                    return BadRequest(new { message = "Tracking number is invalid!" });
+                }
                 //var result = deliveries.ReceiverPool.pool_phone
                 return Ok(deliveries);
 

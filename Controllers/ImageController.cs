@@ -64,6 +64,7 @@ namespace JSE.Controllers
             var delivery = await _context.Delivery.Where(c => c.tracking_number == tracking_number).FirstOrDefaultAsync();
             var image_absolute_path = delivery.image_path;
             if (delivery == null) return NotFound(new { message = "Tracking number is invalid!" });
+            if (image_absolute_path == null) return NotFound(new { message = "No image found!" });
             var directoryPath = Path.Combine("wwwroot", "images"); // Adjust the path as needed
             var filePath = Path.Combine(directoryPath, image_absolute_path);
 

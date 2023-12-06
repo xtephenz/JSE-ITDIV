@@ -152,12 +152,15 @@ namespace JSE.Controllers
                 Shipment Date (DDMMYY): This part encodes the date of shipment or order placement, using a date format like YYMMDD or MMDDYY.
                 Package Identifier (12345): This part is a unique identifier for the package, allowing for a larger range of possibilities.
                 */
-                DateTime sending_date = DateTime.Now;
+                var sending_date = DateTime.Now;
                 string packageType = delivery.service_type.ToString().ToUpper();
-                int packagesToDate =  _context.Delivery.Where(d => d.sending_date == sending_date).Count() + 1;
+                int packagesToDate =  await _context.Delivery.Where(d => d.sending_date == sending_date).CountAsync();
+                packagesToDate += 1;
+                //return Ok(packagesToDate+1);
                 string packageIdentifier = packagesToDate.ToString("D5");
                 string shipmentDate = sending_date.ToString("yyyyMMdd");
                 string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";
+                //return Ok(trackingNumber);
 
 
                 var message = new Message()
@@ -170,11 +173,9 @@ namespace JSE.Controllers
                 //Console.WriteLine(processedDeliveryObject);
                 processedDeliveryObject.tracking_number = trackingNumber;
                 processedDeliveryObject.delivery_status = "on_sender_pool";
-
+                processedDeliveryObject.sending_date = sending_date;
 
                 var output = _mapper.Map<GetDeliveryResult>(processedDeliveryObject);
-
-                
 
                 await _context.Message.AddAsync(message);
                 await _context.Delivery.AddAsync(processedDeliveryObject);

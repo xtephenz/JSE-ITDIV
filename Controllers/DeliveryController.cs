@@ -154,9 +154,7 @@ namespace JSE.Controllers
                 */
                 var sending_date = DateTime.Now;
                 string packageType = delivery.service_type.ToString().ToUpper();
-                int packagesToDate =  await _context.Delivery.Where(d => d.sending_date == sending_date).CountAsync();
-                packagesToDate += 1;
-                //return Ok(packagesToDate+1);
+                int packagesToDate =  await _context.Delivery.Where(d => d.sending_date.Date == sending_date.Date).CountAsync() + 1;
                 string packageIdentifier = packagesToDate.ToString("D5");
                 string shipmentDate = sending_date.ToString("yyyyMMdd");
                 string trackingNumber = $"{packageType}{shipmentDate}{packageIdentifier}";

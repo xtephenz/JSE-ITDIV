@@ -469,31 +469,31 @@ namespace JSE.Controllers
             {
                 try
                 {
-                var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
-                var delivery = await _context.Delivery.Where(d => d.tracking_number == deliveryObject.tracking_number).FirstOrDefaultAsync();
-                if (admin_pool_city != delivery.pool_receiver_city)
-                    return BadRequest(new { message = $"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!" });
-                    if (delivery.delivery_status == "otw_receiver_address")
-                    {
-                        delivery.delivery_status = "package_delivered";
-                        delivery.actual_receiver_name = deliveryObject.receiver_name;
-                        delivery.Courier.courier_availability = true;
-                        delivery.arrival_date = DateTime.Now;
-                        var newMessage = new Message()
+                    var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
+                    var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == deliveryObject.tracking_number).FirstOrDefaultAsync();
+                    if (admin_pool_city != delivery.pool_receiver_city)
+                        return BadRequest(new { message = $"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!" });
+                        if (delivery.delivery_status == "otw_receiver_address")
                         {
-                            message_text = $"Package is received by {deliveryObject.receiver_name}.",
-                            tracking_number = deliveryObject.tracking_number,
-                            timestamp = DateTime.Now,
-                        };
+                            delivery.delivery_status = "package_delivered";
+                            delivery.actual_receiver_name = deliveryObject.receiver_name;
+                            delivery.Courier.courier_availability = true;
+                            delivery.arrival_date = DateTime.Now;
+                            var newMessage = new Message()
+                            {
+                                message_text = $"Package is received by {deliveryObject.receiver_name}.",
+                                tracking_number = deliveryObject.tracking_number,
+                                timestamp = DateTime.Now,
+                            };
 
-                        GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
-                        await _context.Message.AddAsync(newMessage);
-                        await _context.SaveChangesAsync();
-                        return Ok(result);
-                    }
-                    else
-                    {
-                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
+                            GetMessageResult result = _mapper.Map<Message, GetMessageResult>(newMessage);
+                            await _context.Message.AddAsync(newMessage);
+                            await _context.SaveChangesAsync();
+                            return Ok(result);
+                        }
+                        else
+                        {
+                        return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
                 }
                 }
                 catch (Exception ex)

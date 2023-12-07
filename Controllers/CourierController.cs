@@ -217,7 +217,7 @@ namespace JSE.Controllers
         /// </remarks>
         /// <params name="history"></params>
 
-        [HttpGet("history"), Authorize]
+        [HttpGet("history"), Authorize(Roles="Courier")]
 
         public async Task<IActionResult> GetDeliveryListCourier()
         {
@@ -296,7 +296,7 @@ namespace JSE.Controllers
         ///         }
         /// </remarks>
         /// <param name="current_delivery"></param>
-        [HttpGet("current_delivery"), Authorize]
+        [HttpGet("current_delivery"), Authorize(Roles = "Courier")]
         public async Task<IActionResult> GetCurrentDeliveryCourier()
         {
             try

@@ -137,7 +137,7 @@ namespace JSE.Controllers
         ///</remarks>
         ///
         /// <param name="login"></param>
-        [HttpPost("/create_delivery")]
+        [HttpPost("create_delivery")]
         public async Task<IActionResult> PostDelivery([FromBody] CreateDelivery delivery)
         {
             try
@@ -233,7 +233,7 @@ namespace JSE.Controllers
         /// </remarks>
         /// <param name="tracking_number"></param>
 
-        [HttpGet("/delivery/{tracking_number}")]
+        [HttpGet("{tracking_number}")]
         public async Task<IActionResult> GetByTrackingNumber(String tracking_number) //FromBody itu json
         {
             try
@@ -272,7 +272,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="dispatch"></param>
-        [HttpPatch("/dispatch")] //admin
+        [HttpPatch("dispatch")] //admin
         public async Task<IActionResult> NewDispatchToDestPool(String tracking_number)
         {
             try
@@ -314,7 +314,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="arrived"></param>
-        [HttpPatch("/arrived"), Authorize] //admin
+        [HttpPatch("arrived"), Authorize] //admin
         public async Task<IActionResult> NewArrivalAtDestPool(String tracking_number)
         {
             try
@@ -391,7 +391,7 @@ namespace JSE.Controllers
         ///     Deliveries assigned to courier!
         /// </remarks>
         /// <param name="arrived"></param>
-        [HttpPost("/assignDeliveries"), Authorize] //admin pencet
+        [HttpPost("assignDeliveries"), Authorize] //admin pencet
         public async Task<IActionResult> AssignDeliveriesToCourier()
         {
             try
@@ -463,22 +463,22 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="arrived"></param>
-        [HttpPatch("/successDelivery"), Authorize] // COURIER PENCET
-            public async Task<IActionResult> SuccessDelivery(String tracking_number, String receiver_name)
+        [HttpPatch("successDelivery"), Authorize] // COURIER PENCET
+            public async Task<IActionResult> SuccessDelivery([FromBody] GetSuccessDelivery deliveryObject)
             {
                 try
                 {
-                    var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == tracking_number).FirstAsync();
+                    var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == deliveryObject.tracking_number).FirstAsync();
                     if (delivery.delivery_status == "otw_receiver_address")
                     {
                         delivery.delivery_status = "package_delivered";
-                        delivery.actual_receiver_name = receiver_name;
+                        delivery.actual_receiver_name = deliveryObject.receiver_name;
                         delivery.Courier.courier_availability = true;
                         delivery.arrival_date = DateTime.Now;
                         var newMessage = new Message()
                         {
-                            message_text = $"Package is received by {receiver_name}.",
-                            tracking_number = tracking_number,
+                            message_text = $"Package is received by {deliveryObject.receiver_name}.",
+                            tracking_number = deliveryObject.tracking_number,
                             timestamp = DateTime.Now,
                         };
 
@@ -509,7 +509,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="failedDelivery"></param>
-        [HttpPatch("/failedDelivery"), Authorize]
+        [HttpPatch("failedDelivery"), Authorize]
         public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
         {
             try
@@ -556,7 +556,7 @@ namespace JSE.Controllers
         ///     }
         /// </remarks>
         /// <param name="returnedToPool"></param>
-        [HttpPatch("/returnedToPool")]
+        [HttpPatch("returnedToPool")]
 
         public async Task<IActionResult> ReturnedToPool(String tracking_number)
         {

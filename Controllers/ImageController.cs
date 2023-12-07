@@ -19,13 +19,13 @@ namespace JSE.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> ReceiveImageFromCourier(IFormFile image, string trackingNumber)
+        [HttpPost("{tracking_number}")]
+        public async Task<IActionResult> ReceiveImageFromCourier(IFormFile image, string tracking_number)
         {
             if (image == null || image.Length == 0)
                 return BadRequest("Invalid image file");
 
-            var delivery = _context.Delivery.Find(trackingNumber);
+            var delivery = _context.Delivery.Find(tracking_number);
 
             if (delivery == null)
                 return NotFound("Delivery not found");

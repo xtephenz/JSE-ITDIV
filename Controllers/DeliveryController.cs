@@ -295,7 +295,8 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
+                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
+
                 }
             }
             catch (Exception ex)
@@ -322,7 +323,7 @@ namespace JSE.Controllers
                 var delivery = await _context.Delivery.FindAsync(tracking_number);
                 var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
                 if (admin_pool_city != delivery.pool_receiver_city) 
-                    return BadRequest($"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!");
+                    return BadRequest(new { message = $"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!" });
                 if (delivery.delivery_status == "dispatched")
                 {
                     delivery.delivery_status = "on_destination_pool";
@@ -340,7 +341,7 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
+                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
                 }
             }
             catch (Exception ex)
@@ -468,7 +469,10 @@ namespace JSE.Controllers
             {
                 try
                 {
-                    var delivery = await _context.Delivery.Include(d => d.Courier).Where(d => d.tracking_number == deliveryObject.tracking_number).FirstAsync();
+                var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
+                var delivery = await _context.Delivery.Where(d => d.tracking_number == deliveryObject.tracking_number).FirstOrDefaultAsync();
+                if (admin_pool_city != delivery.pool_receiver_city)
+                    return BadRequest(new { message = $"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!" });
                     if (delivery.delivery_status == "otw_receiver_address")
                     {
                         delivery.delivery_status = "package_delivered";
@@ -489,8 +493,8 @@ namespace JSE.Controllers
                     }
                     else
                     {
-                        return BadRequest($"Invalid request!, package is already on status: {delivery.delivery_status}.");
-                    }
+                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
+                }
                 }
                 catch (Exception ex)
                 {
@@ -510,22 +514,22 @@ namespace JSE.Controllers
         /// </remarks>
         /// <param name="failedDelivery"></param>
         [HttpPatch("failedDelivery"), Authorize]
-        public async Task<IActionResult> FailedDelivery(String tracking_number, String courier_message)
+        public async Task<IActionResult> FailedDelivery([FromBody] GetFailedDelivery deliveryObject)
         {
             try
             {
                 var admin_pool_city = User?.FindFirstValue("pool_city").ToString();
-                var delivery = await _context.Delivery.Where(d => d.tracking_number == tracking_number).FirstOrDefaultAsync();
+                var delivery = await _context.Delivery.Where(d => d.tracking_number == deliveryObject.tracking_number).FirstOrDefaultAsync();
                 if (admin_pool_city != delivery.pool_receiver_city)
-                    return BadRequest($"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!");
+                    return BadRequest(new {message = $"You are not the admin of {delivery.pool_receiver_city}! Please use the correct credentials to update package status!" });
                 if (delivery.delivery_status == "otw_receiver_address")
                 {
                     delivery.delivery_status = "delivery_failed";
-                    delivery.fail_message = courier_message;
+                    delivery.fail_message = deliveryObject.reason;
                     var newMessage = new Message()
                     {
-                        message_text = $"Package is rejected. \"{courier_message}\"",
-                        tracking_number = tracking_number,
+                        message_text = $"Package is rejected. \"{deliveryObject.reason}\"",
+                        tracking_number = deliveryObject.tracking_number,
                         timestamp = DateTime.Now,
                     };
 
@@ -536,7 +540,7 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
+                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
                 }
             }
             catch (Exception ex)
@@ -582,7 +586,8 @@ namespace JSE.Controllers
                 }
                 else
                 {
-                    return BadRequest($"Invalid request! package is already on status: {delivery.delivery_status}.");
+                    return BadRequest(new { message = $"Invalid request!, package is already on status: {delivery.delivery_status}." });
+
                 }
             }
             catch (Exception ex)

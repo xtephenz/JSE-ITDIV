@@ -301,7 +301,7 @@ namespace JSE.Controllers
         {
             try
             {
-                List<String> accepted_statuses = new List<String> { "on_destination_pool", "otw_receiver_address", "package_delivered", "delivery_failed" };
+                List<String> accepted_statuses = new List<String> { "otw_receiver_address", "delivery_failed" };
                 var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var deliveries = await _context.Delivery
                     .Include(d => d.SenderPool)

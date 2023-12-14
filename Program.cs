@@ -57,7 +57,7 @@ builder.Services.AddControllers()
 builder.Services.AddDbContext<AppDbContext>(
     options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection"));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
     }
 );
 var app = builder.Build();
@@ -71,7 +71,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "JSE API");
     });
 }
 

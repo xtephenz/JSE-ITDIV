@@ -11,6 +11,8 @@ namespace JSE.Models.Requests
 
         public string delivery_status { get; set; }
 
+        public string intended_receiver_name { get; set; }
+
         public string actual_receiver_name { get; set; }
 
         public string receiver_phone { get; set; }

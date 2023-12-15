@@ -223,7 +223,7 @@ namespace JSE.Controllers
         {
             try
             {
-                var accepted_statuses = new List<String> { "package_delivered", "delivery_failed", "returned_to_pool" };
+                var accepted_statuses = new List<String> { "otw_receiver_address", "package_delivered", "delivery_failed", "returned_to_pool" };
                 var courier_id = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
                 var DeliveryList = await _context.Delivery.Where(c => c.courier_id == courier_id && accepted_statuses.Contains(c.delivery_status)).ToListAsync();
                 DeliveryList.Reverse();
